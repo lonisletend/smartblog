@@ -1,0 +1,10 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+  <!-- 主体页面 包括文章索引,分页,右侧部件 -->
+  {% include "blog/_page.html" %}
+  <!-- 注册模态框 -->
+  {% include "blog/_register.html" %}
+  <!-- 登录模态框 -->
+  {% include "blog/_login.html" %}
+{% endblock %}
