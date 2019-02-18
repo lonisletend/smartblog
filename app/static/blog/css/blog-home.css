@@ -18,3 +18,9 @@ body {
   margin-left: 2rem;
   /* margin-right: 2rem; */
 }
+
+p img{
+  max-width: 100%;
+  height: auto;
+  box-shadow: 5px 5px 2px #888888;
+}
