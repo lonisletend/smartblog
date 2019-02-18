@@ -1,0 +1,178 @@
+    <!-- Article Detail -->
+    <div class="card mb-4">
+        <div class="card-header text-muted">
+        <h2 class="card-title text-dark text-center">CentOS7上基于LAMP搭建typecho博客</h2>
+        <!-- article info -->
+        <div class="text-center">
+            <!-- data -->
+            <span>
+                <img style="margin-bottom: 5px" src="../../static/blog/icons/date.png" alt="发布日期" title="发布日期">
+                <span >2019-02-15 &nbsp;&nbsp;</span>
+            </span>
+            <span>
+                <img style="margin-bottom: 5px" src="../../static/blog/icons/author.png" alt="作者" title="作者">
+                <span ><a href="#">lonisletend</a> &nbsp;&nbsp;</span>
+            </span>
+            <span>
+                <img style="margin-bottom: 2px" src="../../static/blog/icons/cate.png" alt="分类" title="分类">
+                <span><a class="badge badge-secondary" href="#">Linux</a> &nbsp;&nbsp;</span>
+            </span>
+            <span>
+            <img style="margin-bottom: 2px" src="../../static/blog/icons/tag.png" alt="标签" title="标签">
+            <span><a class="badge badge-primary" href="#">C</a> </span>
+            <span><a class="badge badge-info" href="#">shell</a> </span>
+            <span></span><a class="badge badge-success" href="#">test</a> </span>
+            &nbsp;&nbsp;
+            </span>
+            <span>
+            <img style="margin-bottom: 5px" src="../../static/blog/icons/reading.png" alt="阅读数" title="阅读数">
+            <span class="text-primary">1213</span>
+            </span>
+
+        </div>
+        </div>
+        <div class="card-body">
+        <!-- 文章主体内容(暂定html格式) -->
+        <p class="card-text">
+                <h2>LAMP环境的搭建</h2>
+                <p>LAMP = Linux + Apache  + MySQL + PHP</p>
+                <p>这里Linux选择的是CentOS7  64位，使用KVM虚拟机安装的CentOS7进行演示， 安装过程使用yum， yum源是安装好CentOS7之后自带的，也可以选择epel源，163源等，在安装MySQL时需要先安装MySQL源（后面会说到），过程中需要联网安装并且需要root权限。准备好这些，主要的就是后三者的安装和使用了。</p>
+                <h3>安装Apache的httpd服务</h3>
+                <ul>
+                <li>安装httpd</li>
+                
+                </ul>
+                <pre><code class='language-shell' lang='shell'>[root@centos7 ~]# yum install httpd
+                </code></pre>
+                <ul>
+                <li>启动httpd服务</li>
+                
+                </ul>
+                <pre><code>[roo@centos7 ~]# systemctl start httpd
+                </code></pre>
+                <ul>
+                <li>查看httpd服务状态</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# systemctl status httpd
+                </code></pre>
+                <p>看到 Active: active (running) 说明httpd服务已经起来了</p>
+                <ul>
+                <li>让httpd服务开机启动</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# systemctl enable httpd
+                </code></pre>
+                <pre><code>这样当服务器主机重启之后httpd服务会自动开启
+                </code></pre>
+                <p>这里稍作解释，可以看到上面三个命令都是systemctl命令，<a href='http://man.linuxde.net/systemctl'>systemctl命令</a>是系统服务管理器指令，从centos7开始使用，它实际上将 <a href='http://man.linuxde.net/service'>service</a> 和 <a href='http://man.linuxde.net/chkconfig'>chkconfig</a> 这两个命令组合到一起。所以本文特别强调是基于centos7，但是对centos6系统上的操作也具有一定的参考价值，因为只要对命令稍作修改就可以了，思路是一样的。</p>
+                <p>好了，httpd服务开启意味着我们应该可以通过访问主机IP或者解析到该IP的域名来访问Apache提供的测试页面了，但是别着急，还有一座大山等着我们，那就是防火墙。</p>
+                <ul>
+                <li>查看防火墙状态，在CentOS7上，防火墙的服务叫firewalld.service,在使用时可以不加“.service”, httpd也是同样的道理。</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# systemctl status firewalld.service
+                </code></pre>
+                <p>同样看到Active: active (running) 说明防火墙是开启的，而Active: inactive (dead) 则表明防火墙处于关闭状态，一般情况下，建议防火墙是开着的，因为对于服务器来说，防火墙对防止外来攻击起到了不可忽视的作用，但是这里防火墙会阻挡http访问，下面提供解决方案。</p>
+                <ul>
+                <li>一、给防火墙增加规则来放行http以及https（为以后做准备）</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# firewall-cmd --permanent --add-service=http
+                [root@centos7 ~]# firewall-cmd --permanent --add-service=https
+                </code></pre>
+                <p>添加成功后会看到success的提示。注意，一定要加--permanent选项，这样这条规则会在防火墙重启之后依然生效。</p>
+                <ul>
+                <li>二、那就是简单粗暴的关闭防火墙服务（*不建议）</li>
+                
+                </ul>
+                <pre><code class='language-shell' lang='shell'>[root@centos7 ~]# systemctl stop firewalld.service
+                </code></pre>
+                <p>解决了防火墙的问题就可以试着访问一下了。如果不出意外的话应该看到这个界面：</p>
+                <p><img src='https://image-1252852472.cos.ap-beijing.myqcloud.com/apache_test.png' alt='apache_test' referrerPolicy='no-referrer' /></p>
+                <p>默认的网站根目录为/var/www/html/ ,也可以编写一个简单的index.html放在该目录下，并试着访问ip。</p>
+                <pre><code>[root@centos7 ~]# cd /var/www/html/
+                [root@centos7 html]# ls
+                [root@centos7 html]# vim index.html
+                &lt;h1&gt;httpd test!!!&lt;/h1&gt;
+                [root@centos7 html]# systemctl restart httpd
+                </code></pre>
+                <p>访问IP：</p>
+                <p><img src='https://image-1252852472.cos.ap-beijing.myqcloud.com/20180828/index_html.png' alt='index_html' referrerPolicy='no-referrer' /></p>
+                <p>到此为止，Apache算是搞定了。</p>
+                <p>&nbsp;</p>
+                <h3>安装和配置MySQL</h3>
+                <p>这里选择安装MySQL5.7，也可以到<a href='http://dev.mysql.com/downloads/repo/yum/'>官网</a>下载最新或者选择合适的版本。</p>
+                <ul>
+                <li>下载MySQL源rpm安装包</li>
+                
+                </ul>
+                <pre><code class='language-shell' lang='shell'>[root@centos7 ~]# cd
+                [root@centos7 ~]# mkdir mysql
+                [root@centos7 ~]# cd mysql/
+                [root@centos7 mysql]# wget http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
+                </code></pre>
+                <ul>
+                <li>安装MySQL源</li>
+                
+                </ul>
+                <pre><code>[root@centos7 mysql]# rpm -ivh mysql57-community-release-el7-8.noarch.rpm
+                </code></pre>
+                <p>或者执行</p>
+                <pre><code>[root@centos7 mysql]# yum localinstall mysql57-community-release-el7-8.noarch.rpm
+                </code></pre>
+                <ul>
+                <li>检查MySQL源是否安装成功</li>
+                
+                </ul>
+                <pre><code>[root@centos7 mysql]# yum repolist enabled |grep mysql
+                </code></pre>
+                <p>如下图所示表明安装成功</p>
+                <p><img src='https://image-1252852472.cos.ap-beijing.myqcloud.com/mysql_repo.png' alt='apache_repo' referrerPolicy='no-referrer' /></p>
+                <ul>
+                <li>安装mysql-community-server</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# yum install mysql-community-server
+                </code></pre>
+                <ul>
+                <li>启动mysqld服务</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# systemctl start mysqld
+                </code></pre>
+                <p>第一次启动时间可能比较长，一定要耐心等待。</p>
+                <ul>
+                <li>检查mysqld服务是否启动</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# systemctl status mysqld
+                </code></pre>
+                <p>相信你已经会判断服务是否启动了。</p>
+                <ul>
+                <li>mysqld开机启动</li>
+                
+                </ul>
+                <pre><code>[root@centos7 ~]# systemctl enable mysqld
+                </code></pre>
+                <ul>
+                <li>修改root本地登录密码</li>
+                
+                </ul>
+                <p>mysql安装完成之后，在/var/log/mysqld.log文件中给root生成了一个默认密码。</p>
+                <p>通过下面的方式找到root默认密码，然后登录mysql进行修改：</p>
+                <pre><code>[root@centos7 ~]# grep &#39;temporary password&#39; /var/log/mysqld.log
+                </code></pre>
+                <p><img src='https://image-1252852472.cos.ap-beijing.myqcloud.com/mysql_root_tempPasswd.png' alt='mysql_root_tempPasswd' referrerPolicy='no-referrer' /></p>
+                <pre><code>[root@centos7 ~]# mysql -uroot -p
+                mysql&gt; ALTER USER root@localhost IDENTIFIED BY &#39;Test123.&#39;;
+                或者
+                mysql&gt; set password for &#39;root&#39;@&#39;localhost&#39;=password(&#39;Test123.&#39;); 
+                </code></pre>
+                <p>注意：mysql5.7默认安装了密码安全检查插件（validate_password），默认密码检查策略要求密码必须包含：大小写字母、数字和特殊符号，并且长度不能少于8位。否则会提示ERROR 1819 (HY000): Your password does not satisfy the current policy requirements错误。</p>
+                <p>既然要搭建博客，那博客的一些数据就要存在数据库中，在typecho搭建时需要指定数据库和数据库用户，所以接下来：</p>
+                <ul>
+                <li>为typecho创建一个数据库，这里数据库名为typecho。</li>
+        <!-- 文章主体结束 -->
+        </div>
+    </div>
