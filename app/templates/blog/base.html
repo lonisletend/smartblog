@@ -27,7 +27,8 @@
     <!-- Bootstrap core JavaScript -->
     <script src="../../static/blog/jquery/jquery.min.js"></script>
     <script src="../../static/blog/bootstrap/js/bootstrap.bundle.min.js"></script>
-
+    <!-- 先加载jQuery，再加载自定义js -->
+    {% block tailscript %}{% endblock %}
   </body>
 
 </html>

@@ -7,4 +7,10 @@
   {% include "blog/_register.html" %}
   <!-- 登录模态框 -->
   {% include "blog/_login.html" %}
+
+{% endblock %}
+
+{% block tailscript %}
+  <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
+  {% include "blog/_modal_redirect_js.html" %}
 {% endblock %}
