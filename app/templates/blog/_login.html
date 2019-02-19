@@ -13,20 +13,26 @@
                 </div>
                 <div class="modal-body">
                     <form class="form-group" action="">
-                            <div class="form-group">
-                                <label for="">用户名</label>
-                                <input class="form-control" type="text" placeholder="">
-                            </div>
-                            <div class="form-group">
-                                <label for="">密码</label>
-                                <input class="form-control" type="password" placeholder="">
-                            </div>
-                            <div class="text-right">
-                                <button class="btn btn-primary" type="submit">登录</button>
-                                <button class="btn btn-danger" data-dismiss="modal">取消</button>
-                            </div>
-                            <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#register">还没有账号？点我注册</a> -->
-                            <a id="toReg" onclick="toReg()" href="" data-toggle="modal" data-dismiss="modal">还没有账号？点我注册</a>
+                        {{ loginForm.hidden_tag() }}
+                        <div class="form-group">
+                            {{ loginForm.username.label }}
+                            {{ loginForm.username(class="form-control") }}
+                            <!-- <label for="">用户名</label> -->
+                            <!-- <input class="form-control" type="text" placeholder=""> -->
+                        </div>
+                        <div class="form-group">
+                            {{ loginForm.password.label }}
+                            {{ loginForm.password(class="form-control") }}
+                            <!-- <label for="">密码</label> -->
+                            <!-- <input class="form-control" type="password" placeholder=""> -->
+                        </div>
+                        <div class="text-right">
+                            {{ loginForm.submit(class="btn btn-primary") }}
+                            <!-- <button class="btn btn-primary" type="submit">登录</button> -->
+                            <button class="btn btn-danger" data-dismiss="modal">取消</button>
+                        </div>
+                        <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#register">还没有账号？点我注册</a> -->
+                        <a id="toReg" href="" data-toggle="modal" data-dismiss="modal">还没有账号？点我注册</a>
                     </form>
                 </div>
             </div>

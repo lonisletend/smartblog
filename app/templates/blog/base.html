@@ -8,7 +8,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Blog Home - SmartBlog</title>
+    {% if title %}
+    <title>{{ title }}-SmartBlog</title>
+    {% else %}
+    <title>SmartBlog</title>
+    {% endif %}
 
     <!-- Bootstrap core CSS -->
     <link href="../../static/blog/bootstrap/css/bootstrap.min.css" rel="stylesheet">
