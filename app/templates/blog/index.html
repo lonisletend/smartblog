@@ -14,4 +14,29 @@
 {% block tailscript %}
   <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
   {% include "blog/_modal_redirect_js.html" %}
+  <script>
+    $(document).ready(function(){
+      $("#loginForm").submit(function(event){
+        var formData = {
+          'username': $("#username1").val(),
+          'password': $("#password1").val()
+        }
+        console.log(formData);
+        $.ajax({
+          type: 'post',
+          url: '{{ url_for("login") }}',
+          data: formData,
+          contentType: "application/json;charset=UTF-8",
+          dataType: 'json'
+          // encode: true
+        })
+          .done(function(res) {
+            console.log(res);
+          });
+
+        event.preventDefault();
+
+      });
+    });
+  </script>
 {% endblock %}
