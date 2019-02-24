@@ -5,6 +5,8 @@ import json
 
 # from app.models.user import User
 
+
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -17,24 +19,17 @@ def test():
 
 @app.route('/article')
 def article():
-    return render_template('blog/article.html')
+    loginForm = LoginForm()
+    return render_template('blog/article.html', title="Article", loginForm=loginForm)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-
-    print("test!!!!!!")
-    # username = request.args.get('username')
-    # password = request.args.get('password')
-    data = request.get_data()
-    print(data)
-    print(type(data))
-    json_data = request.get_json()
-    print(json_data)
-    print(type(json_data))
-
-    
-    res = jsonify({'ret': True, 'msg': '登录成功!'})
-    res.status_code = 200
- 
+    username = request.form['username']
+    password = request.form['password']
+    print('username={}, password={}'.format(username, password))
+    if username=='yxj' and password=='123456':
+        res = jsonify({'status': True, 'msg': '登录成功!'})
+    else:
+        res = jsonify({'status': False, 'msg': '用户名或密码不匹配！'})
     return  res
 

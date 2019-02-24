@@ -12,7 +12,7 @@
                     <h1 class="text-center">登录</h1>
                 </div>
                 <div class="modal-body">
-                    <form id="loginForm" class="form-group" method="POST" action="{{ url_for('login') }}">
+                    <form id="loginForm" class="form-group">
                         {{ loginForm.hidden_tag() }}
                         <div class="form-group">
                             {{ loginForm.username.label }}
@@ -28,7 +28,7 @@
                         </div>
                         <div class="text-right">
                             
-                            <button type="submit" class="btn btn-primary" type="submit">登录</button>
+                            <button id="loginbtn" type="button" class="btn btn-primary">登录</button>
                             <button class="btn btn-danger" data-dismiss="modal">取消</button>
                         </div>
                         <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#register">还没有账号？点我注册</a> -->
