@@ -19,6 +19,8 @@
 
     <!-- Custom styles for this template -->
     <link href="../../static/blog/css/blog-home.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/blog/css/message.css">
+    {% block headcss %}{% endblock %}
 
   </head>
 
@@ -31,6 +33,9 @@
     <!-- Bootstrap core JavaScript -->
     <script src="../../static/blog/jquery/jquery.min.js"></script>
     <script src="../../static/blog/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../static/blog/js/message.js"></script>
+    <script src="../../static/blog/js/message.min.js"></script>
+    <script src="../../static/blog/js/messageIE.js"></script>
     <!-- 先加载jQuery，再加载自定义js -->
     {% block tailscript %}{% endblock %}
   </body>

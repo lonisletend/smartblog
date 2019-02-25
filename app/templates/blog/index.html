@@ -1,5 +1,7 @@
 {% extends "blog/base.html" %}
 
+{% block headcss %}{% endblock %}
+
 {% block content %}
 
   <!-- 主体页面 包括文章索引,分页,右侧部件 -->
@@ -26,9 +28,20 @@
           success: function(res){
             //console.log(response);
             if(res.status == true){
-              alert(res.msg);
+              console.log(res);
+              $.message('登录成功！');
+              //alert(res.msg);
+              //$('#msgt').html('登录成功：')
+              //$('msg').html(res.msg)
             }else{
-              alert(res.msg);
+              console.log(res);
+                $.message({
+                  message:'&nbsp;&nbsp;&nbsp;&nbsp;登录失败：'+res.msg,
+                  type:'error'
+                });
+              //alert(res.msg)
+              //$('#msgt').html('登录失败：');
+              //$('#msg').append(res.msg);
             }
           },
           error: function(error){
