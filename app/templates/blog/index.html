@@ -15,12 +15,36 @@
 
 {% block tailscript %}
   <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
-  {% include "blog/_modal_redirect_js.html" %}
+  <script src="../../static/blog/js/modal_redirect.js"></script>
   <script>
+
+    function isEmpty(obj){
+      if(obj==undefined || obj==null || obj==''){
+        return true;
+      }
+      return false;
+    }
+
     $(document).ready(function(){
+      $('#lcomplain').hide();
+      $('#lsuccess').hide();
+      $('#lfail').hide();
+
       $('#loginbtn').click(function(){
-        var username = $('#username').val()
-        var password = $('#password').val()
+        var username = $('#username1').val()
+        var password = $('#password1').val()
+        console.log(username);
+        console.log(isEmpty(username));
+        if(isEmpty(username) || isEmpty(password)){
+          $('#lcomplain').show();
+          $('#lcomplain').html('请填写用户名和密码！');
+          setTimeout(function(){
+            $('#lcomplain').hide();
+          }, 5000)
+          return;
+        }
+
+
         $.ajax({
           url: '/login',
           data: $('#loginForm').serialize(),
@@ -28,20 +52,16 @@
           success: function(res){
             //console.log(response);
             if(res.status == true){
-              console.log(res);
-              $.message('登录成功！');
-              //alert(res.msg);
-              //$('#msgt').html('登录成功：')
-              //$('msg').html(res.msg)
+              $('#lsuccess').show();
+              $('#lsuccess').html(res.msg);
+              location.reload();
             }else{
-              console.log(res);
-                $.message({
-                  message:'&nbsp;&nbsp;&nbsp;&nbsp;登录失败：'+res.msg,
-                  type:'error'
-                });
-              //alert(res.msg)
-              //$('#msgt').html('登录失败：');
-              //$('#msg').append(res.msg);
+              $('#lfail').show();
+              $('#lfail').append(res.msg);
+              setTimeout(function(){
+                $('#lfail').html('<strong>登录失败：</strong>');
+                $('#lfail').hide();
+              }, 5000);
             }
           },
           error: function(error){

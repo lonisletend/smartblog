@@ -13,28 +13,38 @@
                 </div> 
                 <div class="modal-body">
                     <form class="form-group" action="">
-                            <div class="form-group">
-                                <label for="">用户名</label>
-                                <input class="form-control" type="text" placeholder="6-15位字母或数字">
-                            </div>
-                            <div class="form-group">
-                                <label for="">密码</label>
-                                <input class="form-control" type="password" placeholder="至少6位字母或数字">
-                            </div>
-                            <div class="form-group">
-                                <label for="">再次输入密码</label>
-                                <input class="form-control" type="password" placeholder="至少6位字母或数字">
-                            </div>
-                            <div class="form-group">
-                                <label for="">邮箱</label>
-                                <input class="form-control" type="email" placeholder="例如:123@123.com">
-                            </div>
-                            <div class="text-right">
-                                <button class="btn btn-primary" type="submit">提交</button>
-                                <button class="btn btn-danger" data-dismiss="modal">取消</button>
-                            </div>
-                            <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#login">已有账号？点我登录</a> -->
-                            <a id="toLogin" onclick="toLogin()" href="" data-toggle="modal" data-dismiss="modal">已有账号？点我登录</a>
+                        {{ registrationForm.hidden_tag() }}
+                        <div class="form-group">
+                            {{ registrationForm.username.label }}
+                            {{ registrationForm.username(size=32, class="form-control", placeholder="6-15位字母或数字") }}
+                            <!-- <label for="">用户名</label>
+                            <input class="form-control" type="text" placeholder="6-15位字母或数字"> -->
+                        </div>
+                        <div class="form-group">
+                            {{ registrationForm.email.label }}
+                            {{ registrationForm.email(size=64, class="form-control", placeholder="例如:example@gmail.com") }}
+                            <!-- <label for="">邮箱</label>
+                            <input class="form-control" type="email" placeholder="例如:123@123.com"> -->
+                        </div>
+                        <div class="form-group">
+                            {{ registrationForm.password.label }}
+                            {{ registrationForm.password(size=32, class="form-control", placeholder="至少8位字母或数字") }}
+                            <!-- <label for="">密码</label>
+                            <input class="form-control" type="password" placeholder="至少6位字母或数字"> -->
+                        </div>
+                        <div class="form-group">
+                            {{ registrationForm.password2.label }}
+                            {{ registrationForm.password2(size=32, class="form-control", placeholder="至少8位字母或数字") }}
+                            <!-- <label for="">再次输入密码</label>
+                            <input class="form-control" type="password" placeholder="至少6位字母或数字"> -->
+                        </div>
+                        
+                        <div class="text-right">
+                            <button class="btn btn-primary">提交</button>
+                            <button class="btn btn-danger" data-dismiss="modal">取消</button>
+                        </div>
+                        <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#login">已有账号？点我登录</a> -->
+                        <a id="toLogin" onclick="toLogin()" href="" data-toggle="modal" data-dismiss="modal">已有账号？点我登录</a>
                     </form>
                 </div>
             </div>
