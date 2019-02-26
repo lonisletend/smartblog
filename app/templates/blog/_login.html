@@ -13,16 +13,16 @@
                 </div>
                 <div class="modal-body">
                     <form id="loginForm" class="form-group">
-                        {{ loginForm.hidden_tag() }}
+ 
                         <div class="form-group">
                             {{ loginForm.username.label }}
-                            {{ loginForm.username(class="form-control", id="username1") }}
+                            {{ loginForm.username(class="form-control", id="username0") }}
                             <!-- <label for="">用户名</label> -->
                             <!-- <input class="form-control" type="text" placeholder=""> -->
                         </div>
                         <div class="form-group">
                             {{ loginForm.password.label }}
-                            {{ loginForm.password(class="form-control", id="password1") }}
+                            {{ loginForm.password(class="form-control", id="password0") }}
                             <!-- <label for="">密码</label> -->
                             <!-- <input class="form-control" type="password" placeholder=""> -->
                         </div>

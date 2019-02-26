@@ -4,6 +4,8 @@ from app.forms.login_form import LoginForm
 from app.forms.registeration_form import RegistrationForm
 import json
 from flask_login import current_user, login_user
+from app.models.user import User
+from app import db
 
 # from app.models.user import User
 
@@ -35,4 +37,24 @@ def login():
     else:
         res = jsonify({'status': False, 'msg': '用户名或密码错误！'})
     return  res
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    # if current_user.is_authenticated:
+    #     return jsonify({'status': True, 'msg': '用户已登录'})
+    username = request.form['username']
+    email = request.form['email']
+    password = request.form['password']
+    user = User.query.filter_by(username=username).first()
+    if user is not None:
+        return jsonify({'status': False, 'msg': '该用户名已存在！'})
+    user = User.query.filter_by(email=email).first()
+    if user is not None:
+        return jsonify({'status': False, 'msg': '该邮箱已存在！'})
+    user = User(username=username, email=email)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'status': True, 'msg': '注册成功，正在跳转到登录页面...'})
+
 
