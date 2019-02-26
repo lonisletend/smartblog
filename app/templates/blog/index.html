@@ -128,14 +128,21 @@
             //console.log(response);
             if(res.status == true){
               $('#rsuccess').show();
-              $('rsuccess').html(res.msg);
-              location.reload();
+              $('#rsuccess').html(res.msg);
+              setTimeout(function(){
+                //location.reload();
+                $("#register").modal("hide");
+                $("#register").on("hidden.bs.modal",function(){
+                  $("#login").modal("show");
+                  $("#register").off().on("hidden","hidden.bs.modal");
+                })
+              },3000)
             }else{
               $('#rfail').show();
               $('#rfail').append(res.msg);
               setTimeout(function(){
-                $('#lfail').html('<strong>注册失败：</strong>');
-                $('#lfail').hide();
+                $('#rfail').html('<strong>注册失败：</strong>');
+                $('#rfail').hide();
               }, 5000);
             }
           },
