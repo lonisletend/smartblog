@@ -1,33 +1,10 @@
-{% extends "/blog/base.html" %}
 
-{% block content %}
-    <!-- 文章明细主体页面 包括文章头,信息,主体,评论,右侧部件 -->
-    {% include "blog/_article_page.html" %}
-    <!-- 注册模态框 -->
-    {% include "blog/_register.html" %}
-    <!-- 登录模态框 -->
-    {% include "blog/_login.html" %}
-{% endblock %}
-
-{% block tailscript %}
-  <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
-  {% include "blog/_modal_redirect_js.html" %}
-  <script>
-
-      function isEmpty(obj){
+    function isEmpty(obj){
         if(obj==undefined || obj==null || obj==''){
           return true;
         }
         return false;
       }
-  
-      $(document).ready(function(){
-        $('#lcomplain').hide();
-        $('#lsuccess').hide();
-        $('#lfail').hide();
-        $('#rcomplain').hide();
-        $('#rsuccess').hide();
-        $('#rfail').hide();
   
         $('#loginbtn').click(function(){
           var username = $('#username0').val()
@@ -147,21 +124,3 @@
             }
           })
         })
-
-        $('#logoutbtn').click(function(){
-          $.ajax({
-            url: "{{ url_for('logout') }}",
-            type: 'GET',
-            success: function(res) {
-                console.log(res);
-                // alert(res);
-                if (res.status == true) {
-                  location.reload();
-                }
-            }
-          })
-        })
-
-      });
-    </script>
-{% endblock %}

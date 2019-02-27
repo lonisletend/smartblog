@@ -109,6 +109,7 @@
 
 
             <!-- new comment start -->
+            {% if current_user.is_authenticated %}
             <div class="form-group">
             <label class="control-label col-sm-4" for="comment">
                 <h5>添加新评论：</h5>
@@ -122,6 +123,13 @@
             <button type="submit" class="btn btn-primary float-right">提交</button>
             </div>
             </div>
+            {% else %}
+            <div class="form-group">
+                <label class="control-label col-sm-4" for="comment">
+                    <h5>登录才能评论哦:)</h5>
+                </label>
+            </div>
+            {% endif %}
             <!-- new comment end -->
         </div>
     </div>          
