@@ -45,8 +45,11 @@
               {{ current_user.username }}
               </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="bd-versions">
-              <a class="dropdown-item" href="#">个人信息</a>
+              <a class="dropdown-item" href="{{ url_for('profile') }}">个人信息</a>
               <a class="dropdown-item" href="#">我的评论</a>
+              {% if current_user.role == "admin" %}
+              <a class="dropdown-item" href="#">博客管理</a>
+              {% endif %}
               <a class="dropdown-item" id="logoutbtn" href="">退出登录</a>
             </div>
           </li>

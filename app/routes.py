@@ -66,3 +66,7 @@ def logout():
     logout_user()
     # return redirect(url_for('index'))
     return jsonify({'status': True})
+
+@app.route('/profile')
+def profile():
+    return render_template('blog/profile.html')

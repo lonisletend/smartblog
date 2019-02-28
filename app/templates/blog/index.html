@@ -151,6 +151,20 @@
           }
         })
       })
+
+      $('#logoutbtn').click(function(){
+        $.ajax({
+          url: "{{ url_for('logout') }}",
+          type: 'GET',
+          success: function(res) {
+              console.log(res);
+              // alert(res);
+              if (res.status == true) {
+                location.reload();
+              }
+          }
+        })
+      })
     });
   </script>
 {% endblock %}
