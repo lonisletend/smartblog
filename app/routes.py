@@ -6,6 +6,7 @@ import json
 from flask_login import current_user, login_user, login_required, logout_user
 from app.models.user import User
 from app import db
+from datetime import datetime
 
 # from app.models.user import User
 
@@ -37,6 +38,9 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user is None or not user.check_password(password):
         return jsonify({'status': False, 'msg': '用户名或密码错误！'})
+    db.session.add(user)
+    user.logged = datetime.now()
+    db.session.commit()
     login_user(user)
     return jsonify({'status': True, 'msg': '登录成功，正在跳转...'})
 
@@ -67,6 +71,9 @@ def logout():
     # return redirect(url_for('index'))
     return jsonify({'status': True})
 
-@app.route('/profile')
-def profile():
-    return render_template('blog/profile.html')
+@app.route('/profile/<username>')
+@login_required
+def profile(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    return render_template('blog/profile.html', user=user)
+

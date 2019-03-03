@@ -1,69 +1,163 @@
 {% extends "blog/base.html" %}
 
 {% block headcss %}
-<link rel="stylesheet" href="../../static/blog/css/profile.css">
+
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row profile">
-		<div class="col-md-3">
-			<div class="profile-sidebar">
-				<!-- SIDEBAR USERPIC -->
-				<div class="profile-userpic">
-					<img src="http://keenthemes.com/preview/metronic/theme/assets/admin/pages/media/profile/profile_user.jpg" class="img-responsive" alt="">
-				</div>
-				<!-- END SIDEBAR USERPIC -->
-				<!-- SIDEBAR USER TITLE -->
-				<div class="profile-usertitle">
-					<div class="profile-usertitle-name">
-						Marcus Doe
+
+<div class="container" style="height:800px;"><hr>
+    <div class="row my-2">
+        <div class="col-lg-8 order-lg-2">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a href="" data-target="#profile" data-toggle="tab" class="nav-link active">基本信息</a>
+                </li>
+                <li class="nav-item">
+                    <a href="" data-target="#comments" data-toggle="tab" class="nav-link">最近评论</a>
+                </li>
+                {% if current_user == user %}
+                <li class="nav-item">
+                    <a href="" data-target="#edit" data-toggle="tab" class="nav-link">信息修改</a>
+                </li>
+                {% endif %}
+            </ul>
+            <div class="tab-content py-4">
+                <div class="tab-pane active" id="profile">
+                    <!-- <h5 class="mb-3">User Profile</h5> -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form>
+								<div class="form-group row">
+								  <label class="col-sm-2 col-form-label"><strong>用户名:</strong></label>
+								  <div class="col-sm-8">
+									<input type="text" readonly class="form-control-plaintext" value="{{ user.username }}">
+								  </div>
+								</div>
+								<div class="form-group row">
+								  <label class="col-sm-2 col-form-label"><strong>邮箱：</strong></label>
+								  <div class="col-sm-8">
+									<input type="password" readonly class="form-control-plaintext" placeholder="{{ user.email }}">
+								  </div>
+								</div>
+								<div class="form-group row">
+									<label class="col-sm-2 col-form-label"><strong>简介：</strong></label>
+									<div class="col-sm-8">
+										<textarea class="form-control" rows="3" readonly>{{ user.about_me }}</textarea>
+									</div>
+								  </div>
+								  <div class="form-group row">
+									<label class="col-sm-2 col-form-label"><strong>注册时间：</strong></label>
+									<div class="col-sm-8">
+									  <input type="password" readonly class="form-control-plaintext" placeholder="{{ user.created.strftime("%Y-%m-%d %H:%M:%S") }}">
+									</div>
+								  </div>
+								  <div class="form-group row">
+									<label class="col-sm-2 col-form-label"><strong>上次登录：</strong></label>
+									<div class="col-sm-8">
+									  <input type="password" readonly class="form-control-plaintext" placeholder="{{ user.logged.strftime("%Y-%m-%d %H:%M:%S") }}">
+									</div>
+								  </div>
+								  <div class="form-group row">
+									<label class="col-sm-2 col-form-label"><strong>用户组：</strong></label>
+									<div class="col-sm-8">
+									  {% if user.role == "vistor" %}
+									  <input type="password" readonly class="form-control-plaintext" placeholder="普通用户">
+									  {% elif user.role == "admin" %}
+									  <input type="password" readonly class="form-control-plaintext" placeholder="管理员">
+									  {% endif %}
+									</div>
+								  </div>
+							  </form>
+                        </div>
+
+                    </div>
+                    <!--/row-->
+                </div>
+                <div class="tab-pane" id="comments">
+                    <!-- <div class="alert alert-info alert-dismissable">
+                        <a class="panel-close close" data-dismiss="alert">×</a> This is an <strong>.alert</strong>. Use this to show important comments to the user.
+                    </div> -->
+                    <table class="table table-hover table-striped">
+                        <tbody>                                    
+                            <tr>
+                                <td>
+                                   <span class="float-right font-weight-bold">3 hrs ago</span> Here is your a link to the latest summary report from the..
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                   <span class="float-right font-weight-bold">Yesterday</span> There has been a request on your account since that was..
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                   <span class="float-right font-weight-bold">9/10</span> Porttitor vitae ultrices quis, dapibus id dolor. Morbi venenatis lacinia rhoncus. 
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                   <span class="float-right font-weight-bold">9/4</span> Vestibulum tincidunt ullamcorper eros eget luctus. 
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                   <span class="float-right font-weight-bold">9/4</span> Maxamillion ais the fix for tibulum tincidunt ullamcorper eros. 
+                                </td>
+                            </tr>
+                        </tbody> 
+                    </table>
+                </div>
+                {% if current_user == user %}
+                <div class="tab-pane" id="edit">
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form>
+								<h5 class="mb-3">密码修改</h5>
+								<div class="form-group row">
+								  <label class="col-sm-2 col-form-label"><strong>原密码:</strong></label>
+								  <div class="col-sm-8">
+									<input type="password" class="form-control" value="">
+								  </div>
+								</div>
+								<div class="form-group row">
+								  <label class="col-sm-2 col-form-label"><strong>新密码：</strong></label>
+								  <div class="col-sm-8">
+									<input type="password" class="form-control" placeholder="">
+								  </div>
+								</div>
+								<div class="form-group row">
+									<label class="col-sm-2 col-form-label"><strong>确认新密码：</strong></label>
+									<div class="col-sm-8">
+										<input type="password" class="form-control" placeholder="">
+									</div>
+								</div>
+								<h5 class="mb-3">简介修改</h5>
+								<div class="form-group row">
+									<label class="col-sm-2 col-form-label"><strong>简介：</strong></label>
+									<div class="col-sm-8">
+										<textarea class="form-control" rows="3" >{{ user.about_me }}</textarea>
+									</div>
+								</div>
+								<button type="submit" class="btn btn-primary float-right" style="margin-right:120px;">提交</button>
+							  </form>
+                        </div>
 					</div>
-					<div class="profile-usertitle-job">
-						Developer
-					</div>
-				</div>
-				<!-- END SIDEBAR USER TITLE -->
-				<!-- SIDEBAR BUTTONS -->
-				<div class="profile-userbuttons">
-					<button type="button" class="btn btn-success btn-sm">Follow</button>
-					<button type="button" class="btn btn-danger btn-sm">Message</button>
-				</div>
-				<!-- END SIDEBAR BUTTONS -->
-				<!-- SIDEBAR MENU -->
-				<div class="profile-usermenu">
-					<ul class="nav">
-						<li class="active">
-							<a href="#">
-							<i class="glyphicon glyphicon-home"></i>
-							Overview </a>
-						</li>
-						<li>
-							<a href="#">
-							<i class="glyphicon glyphicon-user"></i>
-							Account Settings </a>
-						</li>
-						<li>
-							<a href="#" target="_blank">
-							<i class="glyphicon glyphicon-ok"></i>
-							Tasks </a>
-						</li>
-						<li>
-							<a href="#">
-							<i class="glyphicon glyphicon-flag"></i>
-							Help </a>
-						</li>
-					</ul>
-				</div>
-				<!-- END MENU -->
-			</div>
-		</div>
-		<div class="col-md-9">
-            <div class="profile-content">
-			   Some user related content goes here...
+
+                </div>
+                {% endif %}
             </div>
-		</div>
-	</div>
+        </div>
+        <div class="col-lg-4 order-lg-1 text-center">
+            <img src="{{ user.avatar(150) }}" class="mx-auto img-fluid img-circle d-block" alt="avatar">
+            <h6 class="mt-2">{{ user.username }}</h6>
+            <!-- <label class="custom-file">
+                <input type="file" id="file" class="custom-file-input">
+                <span class="custom-file-control">Choose file</span>
+            </label> -->
+        </div>
+    </div>
 </div>
 
 

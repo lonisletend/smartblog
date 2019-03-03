@@ -4,9 +4,14 @@
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-blog-home/blob/master/LICENSE)
  */
 
+html {
+  height: 100%;
+}
+
 body {
   padding-top: 54px;
   /* padding-right: 0!important; */
+  height:100%;
 }
 
 @media (min-width: 992px) {
@@ -25,3 +30,16 @@ p img{
   height: auto;
   box-shadow: 5px 5px 2px #888888;
 }
+
+#main {
+  overflow:auto;
+  padding-bottom:150px; /* this needs to be bigger than footer height*/
+}
+
+.footer {
+  position: relative;
+  margin-top: -150px; /* negative value of footer height */
+  height: 150px;
+  clear:both;
+  padding-top:20px;
+} 
