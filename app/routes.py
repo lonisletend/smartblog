@@ -77,3 +77,16 @@ def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     return render_template('blog/profile.html', user=user)
 
+
+@app.route('/admin_index')
+@login_required
+def admin_index():
+    if current_user.role == "admin":
+        return render_template('admin/index.html')
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/admin_new')
+@login_required
+def admin_new():
+    return render_template('admin/new.html')

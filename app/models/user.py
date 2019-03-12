@@ -11,6 +11,7 @@ class User(UserMixin,db.Model):
     password = db.Column(db.String(128)) #hash
     email = db.Column(db.String(128), index=True, unique=True)
     about_me = db.Column(db.String(256))
+    articles = db.relationship('Article', backref='author', lazy='dynamic')
     created = db.Column(db.DateTime, index=True, default=datetime.now)
     logged = db.Column(db.DateTime, index=True, default=datetime.now)
     role = db.Column(db.String(16), index=True, default='vistor')   #admin

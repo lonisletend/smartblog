@@ -48,7 +48,7 @@
               <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">个人信息</a>
               <a class="dropdown-item" href="#">我的评论</a>
               {% if current_user.role == "admin" %}
-              <a class="dropdown-item" href="#">博客管理</a>
+              <a class="dropdown-item" href="{{ url_for('admin_index') }}">博客管理</a>
               {% endif %}
               <a class="dropdown-item" id="logoutbtn" href="">退出登录</a>
             </div>

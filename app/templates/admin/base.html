@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="description" content="SmartDash">
+
+    {% if title %}
+    <title>{{ title }}-SmartDash</title>
+    {% else %}
+    <title>SmartDash</title>
+    {% endif %}
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Main CSS-->
+    <link rel="stylesheet" type="text/css" href="../../static/admin/css/main.css">
+    <!-- Font-icon css    待替换为本地CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- 自定义CSS -->
+    {% block headcss %}{% endblock %}
+  
+  </head>
+
+
+  <body class="app sidebar-mini rtl">
+    <!-- Top navbar -->
+    {% include "admin/_navbar.html" %}
+
+    <!-- Sidebar menu-->
+    <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
+    <aside class="app-sidebar">
+      <div class="app-sidebar__user"><img class="app-sidebar__user-avatar" src="https://www.gravatar.com/avatar/3fe291420d30381731cca89f5fa7c451?d=identicon&s=60" alt="User Image">
+        <div>
+          <p class="app-sidebar__user-name">Lonisletend</p>
+          <p class="app-sidebar__user-designation">Administor</p>
+        </div>
+      </div>
+      {% block appmenu %}{% endblock %}
+    </aside>
+
+    <!-- 主要内容 -->
+    {% block content %}{% endblock %}
+
+
+    <!-- Essential javascripts for application to work-->
+    <script src="../../static/admin/js/jquery-3.2.1.min.js"></script>
+    <script src="../../static/admin/js/popper.min.js"></script>
+    <script src="../../static/admin/js/bootstrap.min.js"></script>
+    <script src="../../static/admin/js/main.js"></script>
+    <!-- The javascript plugin to display page loading on top-->
+    <script src="../../static/admin/js/plugins/pace.min.js"></script>
+    <!-- Page specific javascripts-->
+    {% block pagescript %}{% endblock %}
+
+    <!-- 最后加载自定义js -->
+    {% block tailscript %}{% endblock %}
+  </body>
+</html>
