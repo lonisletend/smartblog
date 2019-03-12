@@ -1,80 +1,179 @@
 {% extends "admin/base.html" %}
 
-{% block appmenu %}
+<!-- 自定义CSS -->
+{% block headcss %}
+<link rel="stylesheet" href="../../static/admin/dist/tagify.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.min.css"> {% endblock %} {% block appmenu %}
 <ul class="app-menu">
-        <li><a class="app-menu__item" href="{{ url_for('admin_index') }}"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
-        <li><a class="app-menu__item active" href="#"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
-        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-          <ul class="treeview-menu">
+    <li><a class="app-menu__item" href="{{ url_for('admin_index') }}"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
+    <li><a class="app-menu__item active" href="#"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
+    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <ul class="treeview-menu">
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
             <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
-          </ul>
-        </li>
-        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-          <ul class="treeview-menu">
+        </ul>
+    </li>
+    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <ul class="treeview-menu">
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Notifications</a></li>
-          </ul>
-        </li>
-        <li><a class="app-menu__item" href="charts.html"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
-        
-        
-      </ul>
-{% endblock %}
+        </ul>
+    </li>
+    <li><a class="app-menu__item" href="charts.html"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
 
-{% block content %}
+
+</ul>
+{% endblock %} {% block content %}
 <main class="app-content">
     <div class="row">
         <div class="col-md-12">
-        <div class="tile">
-            <!-- <h3 class="tile-title"></h3> -->
-            <legend>新建文章</legend>
-            <form>
-            <div class="form-group">
-                <label class="col-form-label col-form-label-lg" for="inputLarge">标题</label>
-                <input class="form-control form-control-lg" id="inputLarge" type="text" placeholder="请输入文章标题">
+            <div class="tile">
+                <!-- <h3 class="tile-title"></h3> -->
+                <legend>新建文章</legend>
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label col-form-label-lg" for="inputLarge">标题</label>
+                        <input class="form-control form-control-lg" id="inputLarge" type="text" placeholder="请输入文章标题">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-form-label col-form-label-lg" for="exampleTextarea">正文</label>
+                        <textarea class="form-control" id="exampleTextarea" rows="15"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-lg-6">
+                            <label for="category" class="col-form-label col-form-label-lg">分类</label>
+                            <select class="form-control col-lg-10" id="category">
+                              <option>分类1</option>
+                              <option>分类2</option>
+                              <option>分类3</option>
+                              <option>分类4</option>
+                              <option>分类5</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-6">
+                            <label for="tag" class="col-form-label col-form-label-lg">标签</label>
+                            <input id="tag" name='tags' class='form-control col-lg-10' placeholder='输入标签并回车' value='' autofocus data-blacklist='.NET,PHP'>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-6">
+                            <fieldset class="form-group">
+                                <label for="is_topping" class="col-form-label col-form-label-lg">优先级</label>
+
+                                <div class="animated-radio-button">
+                                    <label>
+                                    <input id="is_topping" type="radio" name="is_topping" value="0" checked><span class="label-text">普通</span>
+                                  </label>
+                                </div>
+                                <div class="animated-radio-button">
+                                    <label>
+                                  <input id="is_topping" type="radio" name="is_topping" value="1"><span class="label-text">置顶</span>
+                                </label>
+                                </div>
+
+                            </fieldset>
+
+                        </div>
+                        <div class="form-group col-lg-6">
+                            <fieldset class="form-group">
+                                <label for="status" class="col-form-label col-form-label-lg">公开度</label>
+                                <div class="animated-radio-button">
+                                    <label>
+                                    <input id="status" type="radio" name="status" value="1" checked><span class="label-text">公开</span>
+                                  </label>
+                                </div>
+                                <div class="animated-radio-button">
+                                    <label>
+                                  <input id="status" type="radio" name="status" value="0"><span class="label-text">隐藏</span>
+                                </label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-secondary" type="button">保存草稿</button>
+                        <button class="btn btn-primary" type="button">发布文章</button>
+
+                    </div>
+
+                </form>
+
             </div>
-
-            <div class="form-group">
-                <label class="col-form-label col-form-label-lg" for="exampleTextarea">正文</label>
-                <textarea class="form-control" id="exampleTextarea" rows="15"></textarea>
-            </div>
-
-            <div class="row">
-                <div class="form-group col-lg-6">
-                <label for="exampleSelect1" class="col-form-label col-form-label-lg">分类</label>
-                <select class="form-control col-lg-10" id="exampleSelect1">
-                    <option>分类1</option>
-                    <option>分类2</option>
-                    <option>分类3</option>
-                    <option>分类4</option>
-                    <option>分类5</option>
-                </select>
-                </div>
-                <div class="form-group col-lg-6">
-                <label for="exampleSelect1" class="col-form-label col-form-label-lg">标签</label>
-                <select class="form-control col-lg-10" id="exampleSelect1">
-                    <option>分类1</option>
-                    <option>分类2</option>
-                    <option>分类3</option>
-                    <option>分类4</option>
-                    <option>分类5</option>
-                </select>
-                </div>
-            </div>
-            
-
-
-            </form>
-
         </div>
-        </div>
-        
+
     </div>
 </main>
-{% endblock %}      
+{% endblock %}
+
+<!-- Page specific javascripts-->
+{% block pagescript %}
+<script src="../../static/admin/dist/tagify.js"></script>
+<script src="../../static/admin/dist/jQuery.tagify.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js'></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{% endblock %}
+
+<!-- 最后加载自定义js -->
+{% block tailscript %}
+<script>
+    var input = document.querySelector('input[name=tags]'),
+        // init Tagify script on the above inputs
+        tagify = new Tagify(input, {
+            whitelist: ["C++", "Java", "Linux", "Modal"],
+            blacklist: [] // <-- passed as an attribute in this demo
+        });
+
+    // "remove all tags" button event listener
+    document.querySelector('.tags--removeAllBtn')
+        .addEventListener('click', tagify.removeAllTags.bind(tagify))
+
+    // Chainable event listeners
+    tagify.on('add', onAddTag)
+        .on('remove', onRemoveTag)
+        .on('input', onInput)
+        .on('edit', onTagEdit)
+        .on('invalid', onInvalidTag)
+        .on('click', onTagClick);
+
+    // tag added callback
+    function onAddTag(e) {
+        console.log("onAddTag: ", e.detail);
+        console.log("original input value: ", input.value)
+        tagify.off('add', onAddTag) // exmaple of removing a custom Tagify event
+    }
+
+    // tag remvoed callback
+    function onRemoveTag(e) {
+        console.log(e.detail);
+        console.log("tagify instance value:", tagify.value)
+    }
+
+    // on character(s) added/removed (user is typing/deleting)
+    function onInput(e) {
+        console.log(e.detail);
+        console.log("onInput: ", e.detail);
+    }
+
+    function onTagEdit(e) {
+        console.log("onTagEdit: ", e.detail);
+    }
+
+    // invalid tag added callback
+    function onInvalidTag(e) {
+        console.log("onInvalidTag: ", e.detail);
+    }
+
+    // invalid tag added callback
+    function onTagClick(e) {
+        console.log(e.detail);
+        console.log("onTagClick: ", e.detail);
+    }
+</script>
+{% endblock %}
