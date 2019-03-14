@@ -1,8 +1,8 @@
-"""add article and category table
+"""empty message
 
-Revision ID: ae36b84d0c7c
-Revises: 6fcb983a0555
-Create Date: 2019-03-14 15:33:31.942960
+Revision ID: a2ac1402a5cb
+Revises: 
+Create Date: 2019-03-14 20:55:58.140548
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ae36b84d0c7c'
-down_revision = '6fcb983a0555'
+revision = 'a2ac1402a5cb'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -26,6 +26,36 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_category_name'), 'category', ['name'], unique=True)
+    op.create_table('relation',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('art_id', sa.Integer(), nullable=True),
+    sa.Column('tag_id', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('tag',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('is_deleted', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_tag_name'), 'tag', ['name'], unique=True)
+    op.create_table('user',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=32), nullable=True),
+    sa.Column('password', sa.String(length=128), nullable=True),
+    sa.Column('email', sa.String(length=128), nullable=True),
+    sa.Column('about_me', sa.String(length=256), nullable=True),
+    sa.Column('created', sa.DateTime(), nullable=True),
+    sa.Column('logged', sa.DateTime(), nullable=True),
+    sa.Column('role', sa.String(length=16), nullable=True),
+    sa.Column('is_deleted', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_user_created'), 'user', ['created'], unique=False)
+    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
+    op.create_index(op.f('ix_user_logged'), 'user', ['logged'], unique=False)
+    op.create_index(op.f('ix_user_role'), 'user', ['role'], unique=False)
+    op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
     op.create_table('article',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=256), nullable=True),
@@ -57,6 +87,15 @@ def downgrade():
     op.drop_index(op.f('ix_article_is_topping'), table_name='article')
     op.drop_index(op.f('ix_article_created'), table_name='article')
     op.drop_table('article')
+    op.drop_index(op.f('ix_user_username'), table_name='user')
+    op.drop_index(op.f('ix_user_role'), table_name='user')
+    op.drop_index(op.f('ix_user_logged'), table_name='user')
+    op.drop_index(op.f('ix_user_email'), table_name='user')
+    op.drop_index(op.f('ix_user_created'), table_name='user')
+    op.drop_table('user')
+    op.drop_index(op.f('ix_tag_name'), table_name='tag')
+    op.drop_table('tag')
+    op.drop_table('relation')
     op.drop_index(op.f('ix_category_name'), table_name='category')
     op.drop_table('category')
     # ### end Alembic commands ###

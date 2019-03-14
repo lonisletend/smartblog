@@ -8,6 +8,7 @@ from app.models.user import User
 from app.models.category import Category
 from app.models.article import Article
 from app.models.tag import Tag
+from app.models.relation import Relation
 from app import db
 from datetime import datetime
 
@@ -118,18 +119,26 @@ def admin_new():
             tempArticle =  Article.query.filter_by(title=title).first()
             # tags
 
-            tags = request.form['tags']
+            tags = eval(request.form['tags'][1:-1])
             print(tags)
+            print(type(tags))
             for tag in tags:
+                print('tag={}'.format(tag))
                 tagName = tag['value']
                 tempTag = Tag.query.filter_by(name=tagName).first()
                 if tempTag is None:
                     tempTag = Tag()
                     tempTag.name = tagName
                     db.session.add(tempTag)
-                    db.session.commit()
+                    # db.session.commit()
                     tempTag = Tag.query.filter_by(name=tagName).first()
-                tempArticle.tag.append(tempTag)
+                relation = Relation()
+                relation.art_id = tempArticle.id
+                print('art_id={}'.format(relation.art_id))
+                relation.tag_id = tempTag.id
+                print('tag_id={}'.format(relation.tag_id))
+                db.session.add(relation)
+                db.session.commit()
 
             return jsonify({'status': True, 'msg': '发布成功！'})
     
