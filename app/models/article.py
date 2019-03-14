@@ -1,11 +1,14 @@
 from app import db
 from datetime import datetime
+# from app.models import relation
+from app.models import tag
 
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
     text = db.Column(db.String(16000000))
     cate_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    tag = db.relationship('Tag', secondary='relation')
     created = db.Column(db.DateTime, index=True, default=datetime.now)
     modified = db.Column(db.DateTime, index=True, default=datetime.now)
     is_topping = db.Column(db.Integer, index=True, default=0)  # 0=不置顶  1=置顶

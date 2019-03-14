@@ -252,14 +252,14 @@
             //console.log(response);
             if(res.status == true){
                 $.notify({
-                    message: "发布成功！"
+                    message: res.msg
                 },{
                     type: 'success'
                 });
             }else{
                 $.notify({
-                title: "错误:",
-                    message: "发布失败！"
+                    title: "错误:",
+                    message: res.msg
                 },{
                     type: 'danger'
                 });

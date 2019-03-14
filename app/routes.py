@@ -7,6 +7,7 @@ from flask_login import current_user, login_user, login_required, logout_user
 from app.models.user import User
 from app.models.category import Category
 from app.models.article import Article
+from app.models.tag import Tag
 from app import db
 from datetime import datetime
 
@@ -109,13 +110,26 @@ def admin_new():
             article.title = request.form['title']
             article.text = request.form['text']
             article.cate_id = request.form['category']
-            # tags
-            tags = request.form['tags']
-            print(tags)
             article.is_topping = request.form['is_topping']
             article.status = request.form['status']
             article.user_id = current_user.id
             db.session.add(article)
             db.session.commit()
+            tempArticle =  Article.query.filter_by(title=title).first()
+            # tags
+
+            tags = request.form['tags']
+            print(tags)
+            for tag in tags:
+                tagName = tag['value']
+                tempTag = Tag.query.filter_by(name=tagName).first()
+                if tempTag is None:
+                    tempTag = Tag()
+                    tempTag.name = tagName
+                    db.session.add(tempTag)
+                    db.session.commit()
+                    tempTag = Tag.query.filter_by(name=tagName).first()
+                tempArticle.tag.append(tempTag)
+
             return jsonify({'status': True, 'msg': '发布成功！'})
     

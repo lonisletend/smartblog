@@ -1,1 +1,1 @@
-__all__=['user, article, category']
+__all__=['user, article, category, relation']
