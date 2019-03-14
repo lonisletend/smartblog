@@ -2,7 +2,7 @@
 
 <!-- 自定义CSS -->
 {% block headcss %}
-<link rel="stylesheet" href="../../static/admin/dist/tagify.css">
+<link rel="stylesheet" href="../../static/admin/tagify/tagify.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.min.css"> {% endblock %} {% block appmenu %}
 <ul class="app-menu">
     <li><a class="app-menu__item" href="{{ url_for('admin_index') }}"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
@@ -114,8 +114,8 @@
 
 <!-- Page specific javascripts-->
 {% block pagescript %}
-<script src="../../static/admin/dist/tagify.js"></script>
-<script src="../../static/admin/dist/jQuery.tagify.min.js"></script>
+<script src="../../static/admin/tagify/tagify.js"></script>
+<script src="../../static/admin/tagify/jQuery.tagify.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js'></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 {% endblock %}
