@@ -35,31 +35,32 @@
             <div class="tile">
                 <!-- <h3 class="tile-title"></h3> -->
                 <legend>新建文章</legend>
-                <form>
+                <form id="newForm">
                     <div class="form-group">
-                        <label class="col-form-label col-form-label-lg" for="inputLarge">标题</label>
-                        <input class="form-control form-control-lg" id="inputLarge" type="text" placeholder="请输入文章标题">
+                        <label for="title" class="col-form-label col-form-label-lg">标题</label>
+                        <input id="title" name="title" class="form-control form-control-lg" type="text" placeholder="请输入文章标题">
                     </div>
 
                     <div class="form-group">
-                        <label class="col-form-label col-form-label-lg" for="exampleTextarea">正文</label>
-                        <textarea class="form-control" id="exampleTextarea" rows="15"></textarea>
+                        <label for="text" class="col-form-label col-form-label-lg">正文</label>
+                        <textarea id="text" name="text" class="form-control" rows="15"></textarea>
                     </div>
 
                     <div class="row">
                         <div class="form-group col-lg-6">
                             <label for="category" class="col-form-label col-form-label-lg">分类</label>
-                            <select class="form-control col-lg-10" id="category">
-                              <option>分类1</option>
-                              <option>分类2</option>
-                              <option>分类3</option>
-                              <option>分类4</option>
-                              <option>分类5</option>
+                            <select id="category" name="category" class="form-control col-lg-10">
+                              <option value="">请选择分类</option>  
+                              {% if cates %}
+                                {% for cate in cates %}
+                                <option value="{{ cate.id }}">{{ cate.name }}</option>
+                                {% endfor %}
+                              {% endif %}
                             </select>
                         </div>
                         <div class="form-group col-lg-6">
-                            <label for="tag" class="col-form-label col-form-label-lg">标签</label>
-                            <input id="tag" name='tags' class='form-control col-lg-10' placeholder='输入标签并回车' value='' autofocus data-blacklist='.NET,PHP'>
+                            <label for="tags" class="col-form-label col-form-label-lg">标签</label>
+                            <input id="tags" name='tags' class='form-control col-lg-10' placeholder='输入标签并回车' value=''>
                         </div>
                     </div>
                     <div class="row">
@@ -98,8 +99,8 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <button class="btn btn-secondary" type="button">保存草稿</button>
-                        <button class="btn btn-primary" type="button">发布文章</button>
+                        <button id="draft" class="btn btn-secondary" type="button">保存草稿</button>
+                        <button id="publish" class="btn btn-primary" type="button">发布文章</button>
 
                     </div>
 
@@ -118,6 +119,9 @@
 <script src="../../static/admin/tagify/jQuery.tagify.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js'></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
+
 {% endblock %}
 
 <!-- 最后加载自定义js -->
@@ -175,5 +179,101 @@
         console.log(e.detail);
         console.log("onTagClick: ", e.detail);
     }
+</script>
+
+<script>
+    function isEmpty(obj){
+      if(obj==undefined || obj==null || obj==''){
+        return true;
+      }
+      return false;
+    };
+
+    $('#publish').click(function(){
+        title = $("#title").val();
+        text = $("#text").val();
+        category = $("#category").val();
+        tag = $("#tags").val();
+        isTopping = $("#is_topping").val();
+        status = $("#status").val();
+
+        if(isEmpty(title)){
+            $.notify({
+                title: "错误:",
+                message: "标题不能为空！"
+            },{
+                type: 'danger'
+            });
+            $("#title").focus();
+            return false;
+        }
+
+        if(isEmpty(text)){
+            $.notify({
+                title: "错误:",
+                message: "正文不能为空！"
+            },{
+                type: 'danger'
+            });
+            $("#text").focus();
+            return false;
+        }
+
+        if(isEmpty(category)){
+            $.notify({
+                title: "错误:",
+                message: "文章必须选择一个分类！"
+            },{
+                type: 'danger'
+            });
+            $("#category").focus();
+            return false;
+        }
+
+        if(isEmpty(tag)){
+            $.notify({
+                title: "错误:",
+                message: "请至少选择或添加一个标签！"
+            },{
+                type: 'danger'
+            });
+            $("#tag").focus();
+            return false;
+        }
+
+        console.log($("#category").val());
+        console.log($("#tag").val())
+        
+        $.ajax({
+          url: '/admin_new',
+          data: $('#newForm').serialize(),
+          type: 'POST',
+          success: function(res){
+            //console.log(response);
+            if(res.status == true){
+                $.notify({
+                    message: "发布成功！"
+                },{
+                    type: 'success'
+                });
+            }else{
+                $.notify({
+                title: "错误:",
+                    message: "发布失败！"
+                },{
+                    type: 'danger'
+                });
+            }
+          },
+          error: function(error){
+            console.log(error);
+          }
+        })
+
+    });
+
+
+
+
 </script>
 {% endblock %}
