@@ -252,7 +252,9 @@
             //console.log(response);
             if(res.status == true){
                 $.notify({
-                    message: res.msg
+                    message: res.msg,
+                    url: '../article/'+res.artid,
+                    target: "_self"
                 },{
                     type: 'success'
                 });
