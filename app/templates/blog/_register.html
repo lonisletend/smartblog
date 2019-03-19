@@ -16,7 +16,7 @@
 
                         <div class="form-group">
                             {{ registrationForm.username.label }}
-                            {{ registrationForm.username(size=32, id="username1", class="form-control", placeholder="6-15位字母或数字") }}
+                            {{ registrationForm.username(size=32, id="username1", class="form-control", placeholder="6-15位字母、数字、下划线") }}
                             <!-- <label for="">用户名</label>
                             <input class="form-control" type="text" placeholder="6-15位字母或数字"> -->
                         </div>
@@ -28,13 +28,13 @@
                         </div>
                         <div class="form-group">
                             {{ registrationForm.password.label }}
-                            {{ registrationForm.password(size=32, id="password1", class="form-control", placeholder="至少8位字母或数字") }}
+                            {{ registrationForm.password(size=32, id="password1", class="form-control", placeholder="至少8位字母、数字、下划线") }}
                             <!-- <label for="">密码</label>
                             <input class="form-control" type="password" placeholder="至少6位字母或数字"> -->
                         </div>
                         <div class="form-group">
                             {{ registrationForm.password2.label }}
-                            {{ registrationForm.password2(size=32, id="password2", class="form-control", placeholder="至少8位字母或数字") }}
+                            {{ registrationForm.password2(size=32, id="password2", class="form-control", placeholder="至少8位字母、数字、下划线") }}
                             <!-- <label for="">再次输入密码</label>
                             <input class="form-control" type="password" placeholder="至少6位字母或数字"> -->
                         </div>

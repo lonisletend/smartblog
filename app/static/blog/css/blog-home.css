@@ -43,3 +43,40 @@ p img{
   clear:both;
   padding-top:20px;
 }  */
+
+pre code {
+  /* background-color: #eee;
+  border: 1px solid #999; */
+  display: block;
+  padding: 20px;
+}
+
+
+.notify-alert {
+  -webkit-box-shadow: 0 3px 10px rgba(0, 0, 0, 0.23), 0 3px 10px rgba(0, 0, 0, 0.16);
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.23), 0 3px 10px rgba(0, 0, 0, 0.16);
+  border: 0 !important;
+  max-width: 400px;
+  color: #FFF;
+}
+
+.notify-alert.alert-success {
+  background-color: #28a745;
+}
+
+.notify-alert.alert-info {
+  background-color: #17a2b8;
+}
+
+.notify-alert.alert-warning {
+  background-color: #ffce3a;
+}
+
+.notify-alert.alert-danger {
+  background-color: #e04b59;
+}
+
+.notify-alert button[data-notify="dismiss"] {
+  margin-left: 5px;
+  outline: none !important;
+}

@@ -9,6 +9,7 @@ from app.models.category import Category
 from app.models.article import Article
 from app.models.tag import Tag
 from app.models.relation import Relation
+from app.models.comment import Comment
 from app import db
 from datetime import datetime
 import copy
@@ -49,6 +50,8 @@ def test():
 def article(artid):
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
+
+    #返回文章详情信息
     art = Article.query.filter_by(id=artid).first()
     article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0}
     article['id'] = art.id
@@ -73,8 +76,37 @@ def article(artid):
     })
     db.session.commit()
 
+    #返回评论信息
+    cmts = Comment.query.filter_by(art_id=artid, is_deleted=0).all()
+    comments = []
+    user = User()
+    cmtinfo = Comment()
+    cmtdict = {'user': user, 'comment': cmtinfo}
+    for cmt in cmts:
+        user1 = User.query.filter_by(id=cmt.user_id).first()
+        cmtdict['user'] = user1
+        cmtdict['comment'] = cmt
+        comments.append(copy.deepcopy(cmtdict))
+
     return render_template('blog/article.html', title="Article", loginForm=loginForm, 
-                            registrationForm=registrationForm, article=article)
+                            registrationForm=registrationForm, article=article, comments=comments)
+
+@app.route('/add_comment', methods=['POST', 'GET'])
+def add_comment():
+    art_id = request.form['art_id']
+    comment = request.form['comment']
+    if comment is None or art_id is None:
+        return jsonify({'status': False, 'msg': '添加评论失败！'})
+    # print(art_id)
+    # print(comment)
+    cmt = Comment()
+    cmt.art_id = art_id
+    cmt.user_id = current_user.id
+    cmt.username = current_user.username
+    cmt.text = comment
+    db.session.add(cmt)
+    db.session.commit()
+    return jsonify({'status': True, 'msg': '添加评论成功！'})
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():

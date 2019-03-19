@@ -3,16 +3,24 @@
         <h5 class="card-header">评论</h5>
         <div class="card-body">
 
+        {% if comments %}
+            {% for cmt in comments %}
+            
             <!-- comment body start -->              
             <div class="row">
-                <div class="col-md-2">
-                    <img src="https://secure.gravatar.com/avatar/3fe291420d30381731cca89f5fa7c451?s=120" class="img img-rounded rounded-circle img-fluid"/>
-                    <p class="text-secondary text-center">15 Sec Ago</p>
+                <div class="col-md-2 d-none d-sm-block">
+                    <img src="{{ cmt['user'].avatar(110) }}" class="img img-rounded rounded-circle img-fluid"/>
+                    
                 </div>
                 <div class="col-md-10">
                     <p>
-                        <a class="float-left" href="#"><strong>Lonisletend</strong>&nbsp;&nbsp;<span class="badge badge-pill badge-info">作者</span></a>
-                        <span class="float-right badge badge-light">#1</span>
+                        <a class="float-left" href="{{ url_for('profile', username=cmt['user'].username) }}"><strong>{{ cmt['user'].username }}</strong></a>
+                        &nbsp;&nbsp;
+                        {% if article and cmt['user'].username == article.author %}
+                        <span class="badge badge-pill badge-info">作者</span>
+                        {% endif %}
+                        
+                        <span class="float-right badge badge-light">#{{ loop.index }}</span>
     <!-- comment star                        
                         <span class="float-right"><i class="text-warning fa fa-star"></i></span>
                         <span class="float-right"><i class="text-warning fa fa-star"></i></span>
@@ -21,19 +29,21 @@
     -->
                 </p>
                 <div class="clearfix"></div>
-                    <p>Machines with brains are the future, and The Verge is here to explain it all. From Google and Facebook’s use of machine learning to rule the web</p>
+                    <p>{{ cmt['comment'].text }}</p>
                     <p>
+                        <span class="text-secondary text-left">
+                                {{ cmt['comment'].created.strftime("%Y-%m-%d %H:%M:%S") }}
+                        </span>
                         <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i> 回复</a>
                         <!-- <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> Like</a> -->
                         <a class="float-right btn text-danger btn-outline-danger"> <i class="fa fa-heart"></i> 点赞</a>
-                </p>
+                    </p>
                 </div>
             </div>
             <!-- comment body end -->
 
-
             <!-- comment inner body start -->
-            <div class="row reply-inner">
+            <!-- <div class="row reply-inner">
             <div class="col-md-2">
                 <img src="https://secure.gravatar.com/avatar/3fe291420d40381731cca89f5fa7c451?s=120" class="img img-rounded rounded-circle img-fluid"/>
                 <p class="text-secondary text-center">15 Min Ago</p>
@@ -49,80 +59,33 @@
                     <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> 已赞</a>
                 </p>
             </div>
-            </div>
+            </div> -->
             <!-- comment inner body end -->
 
-
             <hr class="hr">
-
-
-            <!-- comment body start -->              
-            <div class="row">
-            <div class="col-md-2">
-                <img src="https://secure.gravatar.com/avatar/3fe291420d30381731cca89f5fa7c451?s=120" class="img img-rounded rounded-circle img-fluid"/>
-                <p class="text-secondary text-center">15 Sec Ago</p>
-            </div>
-            <div class="col-md-10">
-                <p>
-                    <a class="float-left" href="#"><strong>Lonisletend</strong></a>
-<!-- comment star                        
-                    <span class="float-right"><i class="text-warning fa fa-star"></i></span>
-                    <span class="float-right"><i class="text-warning fa fa-star"></i></span>
-                    <span class="float-right"><i class="text-warning fa fa-star"></i></span>
-                    <span class="float-right"><i class="text-warning fa fa-star"></i></span>
--->
-                </p>
-                <div class="clearfix"></div>
-                <p>Machines with brains are the future, and The Verge is here to explain it all. From Google and Facebook’s use of machine learning to rule the web</p>
-                <p>
-                    <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i> 回复</a>
-                    <!-- <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> Like</a> -->
-                    <a class="float-right btn text-danger btn-outline-danger"> <i class="fa fa-heart"></i> 点赞</a>
-                </p>
-            </div>
-            </div>
-            <!-- comment body end -->
-
-            
-            <!-- comment inner body start -->
-            <div class="row reply-inner">
-                <div class="col-md-2">
-                    <img src="https://secure.gravatar.com/avatar/3fe291420d40381731cca89f5fa7c451?s=120" class="img img-rounded rounded-circle img-fluid"/>
-                    <p class="text-secondary text-center">15 Min Ago</p>
-                </div>
-                <div class="col-md-10">
-                    <p>
-                        <a class="float-left" href="#"><strong>John Watson</strong></a>
-                </p>
-                <div class="clearfix"></div>
-                    <p>and The Verge is here to explain it all. From Google and Facebook’s use of machine </p>
-                    <p>
-                        <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i> 回复</a>
-                        <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> 已赞</a>
-                </p>
-                </div>
-            </div>
-            <!-- comment inner body end -->
-
-
-            <hr class="hr">
-
+            {% endfor %}
+        {% endif %}
 
             <!-- new comment start -->
             {% if current_user.is_authenticated %}
-            <div class="form-group">
-            <label class="control-label col-sm-4" for="comment">
-                <h5>添加新评论：</h5>
-            </label>
-            <div class="col-sm-16">
-            <textarea class="form-control" rows="4" id="comment"></textarea>
-            </div>
-            </div>
-            <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-16">
-            <button type="submit" class="btn btn-primary float-right">提交</button>
-            </div>
-            </div>
+            <form id="com-form">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="comment">
+                        <h5>添加新评论：</h5>
+                    </label>
+                    {% if article %}
+                    <input id="art_id" name="art_id" type="hidden" value="{{ article.id }}" >
+                    {% endif %}
+                    <div class="col-sm-16">
+                    <textarea id="comment" name="comment" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-16">
+                    <button id="com-sub" type="button" class="btn btn-primary float-right">提交</button>
+                    </div>
+                </div>
+            </form>
             {% else %}
             <div class="form-group">
                 <label class="control-label col-sm-4" for="comment">
@@ -134,3 +97,5 @@
         </div>
     </div>          
     <!-- comment end -->
+
+ 

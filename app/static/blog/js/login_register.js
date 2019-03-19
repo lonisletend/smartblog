@@ -8,6 +8,7 @@ function isEmpty(obj){
 $('#loginbtn').click(function(){
   var username = $('#username0').val()
   var password = $('#password0').val()
+  var xss_pat = /<script/
   console.log(username);
   console.log(isEmpty(username));
   if(isEmpty(username) || isEmpty(password)){
@@ -18,6 +19,16 @@ $('#loginbtn').click(function(){
     }, 5000)
     return;
   }
+
+  if(xss_pat.test(username) || xss_pat.test(password)){
+    $('#lcomplain').show();
+    $('#lcomplain').html('请勿输入特殊标签！');
+    setTimeout(function(){
+      $('#lcomplain').hide();
+    }, 5000)
+    return;
+  }
+
   $.ajax({
     url: '/login',
     data: $('#loginForm').serialize(),
@@ -48,8 +59,12 @@ $('#regbtn').click(function(){
   var password1 = $.trim($('#password1').val());
   var password2 = $.trim($('#password2').val());
   var email = $.trim($('#email').val());
-  var reg = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
-  
+  var username_pat = /^[a-zA-Z0-9_-]{6,15}$/;
+  var password_pat = /^[a-zA-Z0-9_]{8,63}$/;
+  var email_pat = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
+  var xss_pat = /<script/
+
+
   if(isEmpty(username1)){
     $('#rcomplain').show();
     $('#rcomplain').html('用户名不能为空！');
@@ -59,6 +74,17 @@ $('#regbtn').click(function(){
     }, 5000)
     return;
   }
+  if(!username_pat.test(username1)){
+    $('#rcomplain').show();
+    $('#rcomplain').html('用户名格式不正确！');
+    $('#username1').focus();
+    setTimeout(function(){
+      $('#rcomplain').hide();
+    }, 5000)
+    return;
+  }
+
+
   if(isEmpty(email)){
     $('#rcomplain').show();
     $('#rcomplain').html('邮箱不能为空！');
@@ -66,7 +92,7 @@ $('#regbtn').click(function(){
       $('#rcomplain').hide();
     }, 5000)
     return;
-  }else if(!reg.test(email)){
+  }else if(!email_pat.test(email)){
     $('#rcomplain').show();
     $('#rcomplain').html('邮箱格式不正确！');
     setTimeout(function(){
@@ -83,6 +109,17 @@ $('#regbtn').click(function(){
     }, 5000)
     return;
   }
+
+  if(!password_pat.test(password1)){
+    $('#rcomplain').show();
+    $('#rcomplain').html('密码格式不正确！');
+    $('#password1').focus();
+    setTimeout(function(){
+      $('#rcomplain').hide();
+    }, 5000)
+    return;
+  }
+  
   if(password1 != password2){
     $('#rcomplain').show();
     $('#rcomplain').html('两次密码不一致！');
@@ -92,6 +129,19 @@ $('#regbtn').click(function(){
     }, 5000)
     return;
   }
+
+  if(xss_pat.test(username1) || xss_pat.test(email) || xss_pat.test(password1)){
+    $('#rcomplain').show();
+    $('#rcomplain').html('请勿输入特殊标签！');
+    $('#username1').focus();
+    setTimeout(function(){
+      $('#rcomplain').hide();
+    }, 5000)
+    return;
+  }
+
+
+
   $.ajax({
     url: '/register',
     data: $('#registrationForm').serialize(),
