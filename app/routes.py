@@ -23,9 +23,19 @@ import copy
 def index():
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
-    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).all()  #查出所有可见(1)文章+倒序
+
+    #文章分页
+    page = request.args.get('page', 1, type=int)
+
+    #分页查出所有可见(1)文章+倒序
+    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('index', page=arts.next_num) \
+        if arts.has_next else None
+    prev_url = url_for('index', page=arts.prev_num) \
+        if arts.has_prev else None
     articleList = []
-    for art in arts:
+    for art in arts.items:
         artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
         artdict['id'] = art.id
         artdict['title'] = art.title
@@ -40,7 +50,8 @@ def index():
         articleList.append(copy.deepcopy(artdict))
 
     return render_template('blog/index.html', title="Index", loginForm=loginForm, 
-                            registrationForm=registrationForm, articleList=articleList)
+                            registrationForm=registrationForm, articleList=articleList,
+                            prev_url=prev_url, next_url=next_url)
 
 @app.route('/test')
 def test():
