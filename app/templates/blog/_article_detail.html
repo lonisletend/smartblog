@@ -21,7 +21,13 @@
             <span>
                 <img style="margin-bottom: 2px" src="../../static/blog/icons/tag.png" alt="标签" title="标签">
                 {% for tagName in article.tagNames %}
+                {% if loop.index%3 == 1 %}
                 <span><a class="badge badge-primary" href="#">{{ tagName }}</a> </span>
+                {% elif loop.index%3 == 2 %}
+                <span><a class="badge badge-info" href="#">{{ tagName }}</a> </span>
+                {% elif loop.index%3 == 0 %}
+                <span><a class="badge badge-success" href="#">{{ tagName }}</a> </span>
+                {% endif %}
                 {% endfor %}
                 <!-- <span><a class="badge badge-info" href="#">shell</a> </span>
                 <span></span><a class="badge badge-success" href="#">test</a> </span> -->
