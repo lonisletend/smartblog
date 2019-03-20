@@ -17,6 +17,10 @@ import copy
 # from app.models.user import User
 
 
+def is_del(obj):
+    if obj.is_deleted==1:
+        return True
+
 
 @app.route('/')
 @app.route('/index')
@@ -158,6 +162,7 @@ def register():
 @login_required
 def logout():
     logout_user()
+    print(request.full_path)
     # return redirect(url_for('index'))
     return jsonify({'status': True})
 
@@ -165,7 +170,8 @@ def logout():
 @login_required
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('blog/profile.html', user=user)
+    comments = Comment.query.filter_by(user_id=user.id).all()
+    return render_template('blog/profile.html', user=user, comments=comments)
 
 
 @app.route('/admin_index')
@@ -235,3 +241,4 @@ def admin_new():
 
             return jsonify({'status': True, 'msg': '发布成功，点击跳转到文章详情页！', 'artid':tempArticle.id})
     
+
