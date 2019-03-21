@@ -162,16 +162,25 @@ def register():
 @login_required
 def logout():
     logout_user()
-    print(request.full_path)
+    # print(request.full_path)
     # return redirect(url_for('index'))
     return jsonify({'status': True})
 
 @app.route('/profile/<username>')
-@login_required
+# @login_required
 def profile(username):
+    loginForm = LoginForm()
+    registrationForm = RegistrationForm()
+
     user = User.query.filter_by(username=username).first_or_404()
-    comments = Comment.query.filter_by(user_id=user.id).all()
-    return render_template('blog/profile.html', user=user, comments=comments)
+    if current_user.is_authenticated:
+        comments = Comment.query.filter_by(user_id=user.id).all()
+        auth = True
+    else:
+        comments = []
+        auth = False
+    return render_template('blog/profile.html', loginForm=loginForm, registrationForm=registrationForm,
+                            user=user, comments=comments, auth=auth)
 
 
 @app.route('/admin_index')

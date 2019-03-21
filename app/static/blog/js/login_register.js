@@ -175,6 +175,7 @@ $('#regbtn').click(function(){
 })
 
 $('#logoutbtn').click(function(){
+  var url = window.location.href;
   $.ajax({
     url: "/logout",
     type: 'GET',
@@ -182,7 +183,15 @@ $('#logoutbtn').click(function(){
         // console.log(res);
         // alert(res);
         if (res.status == true) {
-          window.location.reload();
+          path = getpath(url);
+          // alert(typeof path);
+          // alert(typeof "profile");
+          // alert(path==="profile");
+          if(path==="profile"){
+            window.location.replace("../index");
+          } else{
+            window.location.reload();
+          }
         } else{
           alert('退出失败!');
         }
@@ -190,4 +199,8 @@ $('#logoutbtn').click(function(){
   })
 })
 
+function getpath(url){
+  arr = url.split('/');
+  return arr[3];
+}
 

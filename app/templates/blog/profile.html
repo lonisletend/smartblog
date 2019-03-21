@@ -5,9 +5,14 @@
 {% endblock %}
 
 {% block content %}
+  <!-- 注册模态框 -->
+  {% include "blog/_register.html" %}
+  <!-- 登录模态框 -->
+  {% include "blog/_login.html" %}
 
 <div class="container" style="height:800px;"><hr>
     <div class="row my-2">
+				{% if auth == True %}
         <div class="col-lg-8 order-lg-2">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
@@ -83,9 +88,17 @@
                           {% if comments %}                                   
                             {% for comment in comments %}
                             <tr>
-                                <td>
+                                <!-- <td>
                                    <span class="float-right font-weight-bold"><a href="{{ url_for('article', artid=comment.art_id) }}">查看文章</a></span> {{ comment.text }}
-                                </td>
+																</td> -->
+																<td>
+																		{{ comment.text }}
+																 </td>
+																 <td>
+																		<span class="float-right font-weight-bold" style="width: 65px;">
+																			<a href="{{ url_for('article', artid=comment.art_id) }}">查看文章</a>
+																		</span>
+																 </td>
                             </tr>
                             {% endfor %}
                           {% endif %}
@@ -132,14 +145,16 @@
                 </div>
                 {% endif %}
             </div>
-        </div>
+				</div>
+				{% elif auth == False %}
+				<div class="col-lg-8 order-lg-2">
+					登录后才能查看用户信息哦:)
+				</div>
+				{% endif %}
+				
         <div class="col-lg-4 order-lg-1 text-center d-none d-sm-block">
             <img src="{{ user.avatar(150) }}" class="mx-auto img-fluid img-circle d-block" alt="avatar">
             <h6 class="mt-2">{{ user.username }}</h6>
-            <!-- <label class="custom-file">
-                <input type="file" id="file" class="custom-file-input">
-                <span class="custom-file-control">Choose file</span>
-            </label> -->
         </div>
     </div>
 </div>
@@ -147,4 +162,19 @@
 
 {% endblock %}
 
-{% block tailscript %}{% endblock %}
+{% block tailscript %}
+  <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
+  <script src="../../static/blog/js/modal_redirect.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('#lcomplain').hide();
+      $('#lsuccess').hide();
+      $('#lfail').hide();
+      $('#rcomplain').hide();
+      $('#rsuccess').hide();
+      $('#rfail').hide();
+
+    });
+  </script>
+	<script src="../../static/blog/js/login_register.js"></script>
+{% endblock %}
