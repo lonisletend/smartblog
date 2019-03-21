@@ -57,9 +57,11 @@ def index():
                             registrationForm=registrationForm, articleList=articleList,
                             prev_url=prev_url, next_url=next_url)
 
+
 @app.route('/test')
 def test():
     return render_template('test/test.html')
+
 
 @app.route('/article/<artid>')
 def article(artid):
@@ -106,6 +108,7 @@ def article(artid):
     return render_template('blog/article.html', title="Article", loginForm=loginForm, 
                             registrationForm=registrationForm, article=article, comments=comments)
 
+
 @app.route('/add_comment', methods=['POST', 'GET'])
 def add_comment():
     art_id = request.form['art_id']
@@ -138,6 +141,7 @@ def login():
     login_user(user)
     return jsonify({'status': True, 'msg': '登录成功，正在跳转...'})
 
+
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     # if current_user.is_authenticated:
@@ -166,6 +170,7 @@ def logout():
     # return redirect(url_for('index'))
     return jsonify({'status': True})
 
+
 @app.route('/profile/<username>')
 # @login_required
 def profile(username):
@@ -181,6 +186,21 @@ def profile(username):
         auth = False
     return render_template('blog/profile.html', loginForm=loginForm, registrationForm=registrationForm,
                             user=user, comments=comments, auth=auth)
+
+
+@app.route('/edit_profile', methods=['POST', 'GET'])
+@login_required
+def edit_profile():
+    password = request.form['epassword']
+    about_me = request.form['about-me']
+    # print('pass={}, about={}'.format(password, about_me))
+    if password is not None and password != '':
+        current_user.set_password(password)
+    if about_me is not None and about_me != '':
+        current_user.about_me = about_me
+    db.session.commit()
+    return jsonify({'status': True, 'msg': ''})
+
 
 
 @app.route('/admin_index')

@@ -73,7 +73,7 @@
 									  {% endif %}
 									</div>
 								  </div>
-							  </form>
+							  						</form>
                         </div>
 
                     </div>
@@ -110,35 +110,35 @@
                     
                     <div class="row">
                         <div class="col-md-12">
-                            <form>
+                            <form id="edit-form">
 								<h5 class="mb-3">密码修改</h5>
-								<div class="form-group row">
+								<!-- <div class="form-group row">
 								  <label class="col-sm-2 col-form-label"><strong>原密码:</strong></label>
 								  <div class="col-sm-8">
 									<input type="password" class="form-control" value="">
 								  </div>
-								</div>
+								</div> -->
 								<div class="form-group row">
 								  <label class="col-sm-2 col-form-label"><strong>新密码：</strong></label>
 								  <div class="col-sm-8">
-									<input type="password" class="form-control" placeholder="">
+									<input id="epassword" name="epassword" type="password" class="form-control" placeholder="">
 								  </div>
 								</div>
 								<div class="form-group row">
 									<label class="col-sm-2 col-form-label"><strong>确认新密码：</strong></label>
 									<div class="col-sm-8">
-										<input type="password" class="form-control" placeholder="">
+										<input id="epassword2" name="epassword2" type="password" class="form-control" placeholder="">
 									</div>
 								</div>
 								<h5 class="mb-3">简介修改</h5>
 								<div class="form-group row">
 									<label class="col-sm-2 col-form-label"><strong>简介：</strong></label>
 									<div class="col-sm-8">
-										<textarea class="form-control" rows="3" >{{ user.about_me }}</textarea>
+										<textarea id="about-me" name="about-me" class="form-control" rows="3" >{{ user.about_me }}</textarea>
 									</div>
 								</div>
-								<button type="submit" class="btn btn-primary float-right" style="margin-right:120px;">提交</button>
-							  </form>
+								<button id="edit-sub" type="submit" class="btn btn-primary float-right" style="margin-right:120px;">提交</button>
+							  						</form>
                         </div>
 					</div>
 
@@ -177,4 +177,66 @@
     });
   </script>
 	<script src="../../static/blog/js/login_register.js"></script>
+	<script>
+
+		function isEmpty(obj){
+			if(obj==undefined || obj==null || obj==''){
+				return true;
+			}
+			return false;
+		}
+
+		$('#edit-sub').click(function(){
+			epassword = $('#epassword').val();
+			epassword2 = $('#epassword2').val();
+			aboutMe = $('#about-me').val();
+
+			//不修改密码
+			if(isEmpty(epassword) && isEmpty(epassword2)){
+				if(isEmpty(aboutMe)){
+					//全部为空，提示
+						$.notify({
+							title: "错误:",
+							message: "请填写修改的密码或简介！"
+					},{
+							type: 'danger'
+					});
+					return false;
+				}
+			} else{
+				//修改密码
+				if(epassword != epassword2){
+					$.notify({
+							title: "错误:",
+							message: "两次密码不一致！"
+					},{
+							type: 'danger'
+					});
+					return false;
+				}
+			}
+			$.ajax({
+          url: '/edit_profile',
+          data: $('#edit-form').serialize(),
+          type: 'POST',
+          success: function(res){
+						// alert(res.status);
+						if(res.status==true){
+							$.notify({
+									message: "信息修改成功！"
+							},{
+									type: 'success'
+							});
+						}
+						return true;
+            
+          },
+          error: function(error){
+						console.log(error);
+						return false;
+          }
+        })
+			
+		});
+	</script>
 {% endblock %}
