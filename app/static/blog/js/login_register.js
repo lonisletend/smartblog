@@ -112,7 +112,7 @@ $('#regbtn').click(function(){
 
   if(!password_pat.test(password1)){
     $('#rcomplain').show();
-    $('#rcomplain').html('密码格式不正确！');
+    $('#rcomplain').html('密码太短或包含非法字符！');
     $('#password1').focus();
     setTimeout(function(){
       $('#rcomplain').hide();
