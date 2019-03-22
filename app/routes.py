@@ -243,7 +243,7 @@ def admin_new():
             ttags = eval(request.form['tags'][1:-1])
             # print(ttags)
             # print(type(ttags))
-            #标签只有一个，eval转出来是dict,有多个，eval转出来是tuple，转换成list再进行统一操作
+            #标签只有一个，eval转出来是dict,有多个，eval转出来是元素为dict的tuple，转换成list再进行统一操作
             tags = []
             if isinstance(ttags, dict):
                 tags.append(ttags)
