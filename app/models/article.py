@@ -2,7 +2,7 @@
 from app import db
 from datetime import datetime
 # from app.models import relation
-from app.models import tag
+# from app.models import tag
 
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)

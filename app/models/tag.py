@@ -1,7 +1,7 @@
 # encoding: utf-8
 from app import db
-from app.models import relation
-from app.models import article
+# from app.models import relation
+# from app.models import article
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
