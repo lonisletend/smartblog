@@ -1,3 +1,4 @@
+# encoding: utf-8
 from app import db
 from datetime import datetime
 # from app.models import relation
