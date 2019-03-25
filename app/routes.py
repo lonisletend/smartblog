@@ -1,8 +1,11 @@
+# encoding: utf-8
+import copy
+from datetime import datetime
 from app import app
+from app import db
 from flask import render_template, request, jsonify, redirect, url_for
 from app.forms.login_form import LoginForm
 from app.forms.registeration_form import RegistrationForm
-import json
 from flask_login import current_user, login_user, login_required, logout_user
 from app.models.user import User
 from app.models.category import Category
@@ -10,9 +13,9 @@ from app.models.article import Article
 from app.models.tag import Tag
 from app.models.relation import Relation
 from app.models.comment import Comment
-from app import db
-from datetime import datetime
-import copy
+
+
+
 
 # from app.models.user import User
 
