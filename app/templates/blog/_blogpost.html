@@ -13,7 +13,7 @@
                 <a href="{{ url_for('article', artid=article.id) }}"><h2 class="card-title">{{ article.title }}</h2></a>
                 <p class="card-text">
                         {% autoescape false %}
-                        {{ article.text }}
+                        {{ article.text }}...
                         {% endautoescape %}
                 </p>
                 <a href="{{ url_for('article', artid=article.id) }}" class="btn btn-primary">阅读全部 &rarr;</a>

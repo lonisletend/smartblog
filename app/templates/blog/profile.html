@@ -107,7 +107,13 @@
                 </div>
                 {% if current_user == user %}
                 <div class="tab-pane" id="edit">
-                    
+									<h5 class="mb-3">头像修改</h5>
+									<div class="form-group row">
+										<label class="col-sm-2 col-form-label"><strong>说明：</strong></label>
+										<div class="col-sm-8">
+											本站使用Gravatar头像，如需修改，请移步<a href="https://cn.gravatar.com/">Gravatar</a>。如果您从未使用过Gravatar，可以使用注册本博客的邮箱<a href="https://cn.gravatar.com/">注册Gravatar</a>并设置头像，您的头像会自动同步过来。
+										</div>
+										</div>
                     <div class="row">
                         <div class="col-md-12">
                             <form id="edit-form">
