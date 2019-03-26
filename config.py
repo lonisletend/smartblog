@@ -8,5 +8,9 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    
+    # 首页最大文章数，超过分页
     POSTS_PER_PAGE = 8
+
+    #文章编辑页最大文章数，超过分页
+    POSTS_PER_PAGE_EDIT = 10

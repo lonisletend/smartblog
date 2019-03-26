@@ -9,45 +9,47 @@
 
 {% block appmenu %}
 <ul class="app-menu">
-    <li><a class="app-menu__item" href="{{ url_for('admin_index') }}"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
-    <li><a class="app-menu__item active" href="#"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
-    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-        <ul class="treeview-menu">
-            <li><a class="treeview-item" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
-            <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
-        </ul>
-    </li>
-    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-        <ul class="treeview-menu">
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Notifications</a></li>
-        </ul>
-    </li>
-    <li><a class="app-menu__item" href="charts.html"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
-
-
-</ul>
+        <li><a class="app-menu__item" href="{{ url_for('admin_index') }}"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
+        <li><a class="app-menu__item" href="{{ url_for('admin_new') }}"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
+        <li class="treeview is-expanded"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item active" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
+            </ul>
+        </li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
+                <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Notifications</a></li>
+            </ul>
+        </li>
+        <li><a class="app-menu__item" href="charts.html"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
+    
+    
+    </ul>
 {% endblock %} {% block content %}
 <main class="app-content">
     <div class="row">
         <div class="col-md-12">
             <div class="tile">
                 <!-- <h3 class="tile-title"></h3> -->
-                <legend>新建文章</legend>
-                <form id="newForm">
+                <legend>编辑文章</legend>
+                {% if article %}
+                <form id="editForm">
+                    <input id="id", name="id" type="hidden" value="{{ article.id }}">
                     <div class="form-group">
                         <label for="title" class="col-form-label col-form-label-lg">标题</label>
-                        <input id="title" name="title" class="form-control form-control-lg" type="text" placeholder="请输入文章标题">
+                        <input id="title" name="title" class="form-control form-control-lg" type="text" placeholder="请输入文章标题" value="{{ article.title }}">
                     </div>
 
                     <div class="form-group">
                         <label for="text" class="col-form-label col-form-label-lg">正文</label>
-                        <textarea id="text" name="text" class="form-control" rows="15"></textarea>
+                        <textarea id="text" name="text" class="form-control" rows="15">{{ article.text }}</textarea>
                     </div>
 
                     <div class="row">
@@ -57,14 +59,18 @@
                               <option value="">请选择分类</option>  
                               {% if cates %}
                                 {% for cate in cates %}
+                                {% if article.cateName == cate.name %}
+                                <option value="{{ cate.id }}" selected>{{ cate.name }}</option>
+                                {% else %}
                                 <option value="{{ cate.id }}">{{ cate.name }}</option>
+                                {% endif %}
                                 {% endfor %}
                               {% endif %}
                             </select>
                         </div>
                         <div class="form-group col-lg-6">
                             <label for="tags" class="col-form-label col-form-label-lg">标签</label>
-                            <input id="tags" name='tags' class='form-control col-lg-10' placeholder='输入标签并回车' value=''>
+                            <input id="tags" name='tags' class='form-control col-lg-10' placeholder='输入标签并回车' value='{{ article.tagStr }}'>
                         </div>
                     </div>
                     <div class="row">
@@ -72,33 +78,61 @@
                             <fieldset class="form-group">
                                 <label for="is_topping" class="col-form-label col-form-label-lg">优先级</label>
 
+                                {% if article.isTopping == 1 %}
                                 <div class="animated-radio-button">
-                                    <label>
-                                    <input id="is_topping" type="radio" name="is_topping" value="0" checked><span class="label-text">普通</span>
-                                  </label>
-                                </div>
+                                        <label>
+                                        <input id="is_topping" type="radio" name="is_topping" value="0"><span class="label-text">普通</span>
+                                        </label>
+                                    </div>
+                                    <div class="animated-radio-button">
+                                        <label>
+                                        <input id="is_topping" type="radio" name="is_topping" value="1" checked><span class="label-text">置顶</span>
+                                        </label>
+                                    </div>
+                                {% else %}
                                 <div class="animated-radio-button">
-                                    <label>
-                                  <input id="is_topping" type="radio" name="is_topping" value="1"><span class="label-text">置顶</span>
-                                </label>
-                                </div>
-
+                                        <label>
+                                        <input id="is_topping" type="radio" name="is_topping" value="0" checked><span class="label-text">普通</span>
+                                        </label>
+                                    </div>
+                                    <div class="animated-radio-button">
+                                        <label>
+                                        <input id="is_topping" type="radio" name="is_topping" value="1"><span class="label-text">置顶</span>
+                                        </label>
+                                    </div>
+                                {% endif %}
                             </fieldset>
 
                         </div>
                         <div class="form-group col-lg-6">
                             <fieldset class="form-group">
                                 <label for="status" class="col-form-label col-form-label-lg">公开度</label>
+
+                                {% if article.status == 0 %}
                                 <div class="animated-radio-button">
-                                    <label>
-                                    <input id="status" type="radio" name="status" value="1" checked><span class="label-text">公开</span>
-                                  </label>
-                                </div>
+                                        <label>
+                                        <input id="status" type="radio" name="status" value="1"><span class="label-text">公开</span>
+                                        </label>
+                                    </div>
+                                    <div class="animated-radio-button">
+                                        <label>
+                                        <input id="status" type="radio" name="status" value="0" checked><span class="label-text">隐藏</span>
+                                        </label>
+                                    </div>
+                                {% else %}
                                 <div class="animated-radio-button">
-                                    <label>
-                                  <input id="status" type="radio" name="status" value="0"><span class="label-text">隐藏</span>
-                                </label>
-                                </div>
+                                        <label>
+                                        <input id="status" type="radio" name="status" value="1" checked><span class="label-text">公开</span>
+                                        </label>
+                                    </div>
+                                    <div class="animated-radio-button">
+                                        <label>
+                                        <input id="status" type="radio" name="status" value="0"><span class="label-text">隐藏</span>
+                                        </label>
+                                    </div>
+                                {% endif %}
+                                
+                                
                             </fieldset>
                         </div>
                     </div>
@@ -109,7 +143,7 @@
                     </div>
 
                 </form>
-
+                {% endif %}
             </div>
         </div>
 
@@ -195,12 +229,16 @@
     };
 
     $('#publish').click(function(){
+        id = $("#id").val();
         title = $("#title").val();
         text = $("#text").val();
         category = $("#category").val();
         tag = $("#tags").val();
         isTopping = $("#is_topping").val();
         status = $("#status").val();
+        posturl = "/article_edit/" + id;
+
+        console.log(posturl);
 
         if(isEmpty(title)){
             $.notify({
@@ -250,8 +288,8 @@
         console.log($("#tag").val())
         
         $.ajax({
-          url: '/admin_new',
-          data: $('#newForm').serialize(),
+          url: posturl,
+          data: $('#editForm').serialize(),
           type: 'POST',
           success: function(res){
             //console.log(response);

@@ -84,7 +84,7 @@ def article(artid):
     cate = Category.query.filter_by(id=art.cate_id).first()
     article['cateName'] = cate.name
     # artdict['tags'] = []
-    res = Relation.query.filter_by(art_id=art.id).all()
+    res = Relation.query.filter_by(art_id=art.id, is_deleted=0).all()
     for re in res:
         tag = Tag.query.filter_by(id=re.tag_id).first()
         article['tagNames'].append(copy.deepcopy(tag.name))
@@ -272,5 +272,147 @@ def admin_new():
                 db.session.commit()
 
             return jsonify({'status': True, 'msg': '发布成功，点击跳转到文章详情页！', 'artid':tempArticle.id})
-    
+
+
+@app.route('/article_manage', methods=['POST', 'GET'])
+@login_required
+def article_manage():
+    page = request.args.get('page', 1, type=int)
+
+    #分页查出所有可见(1)文章+倒序
+    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE_EDIT'], False)
+    next_url = url_for('article_manage', page=arts.next_num) \
+        if arts.has_next else None
+    prev_url = url_for('article_manage', page=arts.prev_num) \
+        if arts.has_prev else None
+    articleList = []
+    for art in arts.items:
+        article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0}
+        article['id'] = art.id
+        article['title'] = art.title
+        article['text'] = art.text
+        article['date'] = art.created.strftime("%Y-%m-%d")
+        user = User.query.filter_by(id=art.user_id).first()
+        article['author'] = user.username
+        article['views'] = art.views+1
+        cate = Category.query.filter_by(id=art.cate_id).first()
+        article['cateName'] = cate.name
+        # artdict['tags'] = []
+        res = Relation.query.filter_by(art_id=art.id, is_deleted=0).all()
+        for re in res:
+            tag = Tag.query.filter_by(id=re.tag_id).first()
+            article['tagNames'].append(copy.deepcopy(tag.name))
+        article['isTopping'] = art.is_topping
+        articleList.append(copy.deepcopy(article))
+    return render_template('admin/article_manage.html', articleList=articleList,
+                            prev_url=prev_url, next_url=next_url)
+
+
+@app.route('/article_edit/<artid>', methods=['POST', 'GET'])
+@login_required
+def article_edit(artid):
+    if request.method == 'GET':
+        #返回文章详情信息
+        art = Article.query.filter_by(id=artid).first()
+        article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagStr':'', 'views':0, 'isTopping':0, 'status':0}
+        article['id'] = art.id
+        article['title'] = art.title
+        article['text'] = art.text
+        article['date'] = art.created.strftime("%Y-%m-%d")
+        user = User.query.filter_by(id=art.user_id).first()
+        article['author'] = user.username
+        article['views'] = art.views+1
+        cate = Category.query.filter_by(id=art.cate_id).first()
+        article['cateName'] = cate.name
+        # artdict['tags'] = []
+        tags = []
+        res = Relation.query.filter_by(art_id=art.id, is_deleted=0).all()
+        for re in res:
+            tag = Tag.query.filter_by(id=re.tag_id).first()
+            tags.append(copy.deepcopy(tag.name))
+        article['tagStr'] = ','.join(tags)
+        article['isTopping'] = art.is_topping
+        article['status'] = art.status
+
+        #所有可选分类
+        cates = Category.query.filter_by(is_deleted=0).all()
+
+        return render_template('admin/article_edit.html', article=article, cates=cates)
+
+    elif request.method == 'POST':
+        # artid = request.form['id']
+        article = Article()
+        article.title = request.form['title']
+        article.text = request.form['text']
+        article.cate_id = request.form['category']
+        article.is_topping = request.form['is_topping']
+        article.status = request.form['status']
+        article.user_id = current_user.id
+        Article.query.filter_by(id=artid).update({
+            'title': article.title,
+            'text':  article.text,
+            'cate_id': article.cate_id,
+            'is_topping': article.is_topping,
+            'status': article.status
+        })
+        db.session.commit()
+        
+        #删除当前文章-标签关系
+        Relation.query.filter_by(art_id=artid).update({
+            'is_deleted': 1
+        })
+        db.session.commit()
+
+        ttags = eval(request.form['tags'][1:-1])
+        # print(ttags)
+        # print(type(ttags))
+        #标签只有一个，eval转出来是dict,有多个，eval转出来是元素为dict的tuple，转换成list再进行统一操作
+        tags = []
+        if isinstance(ttags, dict):
+            tags.append(ttags)
+        else:
+            tags = ttags
+        # 标签存在则查出，不存在则添加，最后添加新的文章-标签关系
+        for tag in tags:
+            # print('tag={}'.format(tag))
+            tagName = tag['value']
+            tempTag = Tag.query.filter_by(name=tagName).first()
+            if tempTag is None:
+                tempTag = Tag()
+                tempTag.name = tagName
+                db.session.add(tempTag)
+                # db.session.commit()
+                tempTag = Tag.query.filter_by(name=tagName).first()
+            relation = Relation()
+            relation.art_id = artid
+            print('art_id={}'.format(relation.art_id))
+            relation.tag_id = tempTag.id
+            print('tag_id={}'.format(relation.tag_id))
+            db.session.add(relation)
+            db.session.commit()
+
+        return jsonify({'status': True, 'msg': '修改成功，点击跳转到文章详情页！', 'artid':artid})
+
+
+@app.route('/article_del/<artid>', methods=['POST', 'GET'])
+@login_required
+def article_del(artid):
+    if current_user.role == "vistor":
+        return render_template('/index')
+    else:
+        # artid = request.form['artid']
+        if artid is not None:
+            # print(artid)
+            Article.query.filter_by(id=artid).update({
+                'is_deleted': 1
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '删除成功！'})
+        else:
+            return jsonify({'status': False, 'msg': '删除失败！文章不存在！'})
+
+
+
+
 
