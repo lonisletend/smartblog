@@ -126,6 +126,12 @@ def add_comment():
     cmt.username = current_user.username
     cmt.text = comment
     db.session.add(cmt)
+
+    article = Article.query.filter_by(id=art_id).first()
+    # 文章评论数+1
+    Article.query.filter_by(id=art_id).update({
+        'comments_num': article.comments_num+1
+    })
     db.session.commit()
     return jsonify({'status': True, 'msg': '添加评论成功！'})
 
@@ -265,9 +271,9 @@ def admin_new():
                     tempTag = Tag.query.filter_by(name=tagName).first()
                 relation = Relation()
                 relation.art_id = tempArticle.id
-                print('art_id={}'.format(relation.art_id))
+                # print('art_id={}'.format(relation.art_id))
                 relation.tag_id = tempTag.id
-                print('tag_id={}'.format(relation.tag_id))
+                # print('tag_id={}'.format(relation.tag_id))
                 db.session.add(relation)
                 db.session.commit()
 
@@ -386,9 +392,9 @@ def article_edit(artid):
                 tempTag = Tag.query.filter_by(name=tagName).first()
             relation = Relation()
             relation.art_id = artid
-            print('art_id={}'.format(relation.art_id))
+            # print('art_id={}'.format(relation.art_id))
             relation.tag_id = tempTag.id
-            print('tag_id={}'.format(relation.tag_id))
+            # print('tag_id={}'.format(relation.tag_id))
             db.session.add(relation)
             db.session.commit()
 
