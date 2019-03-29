@@ -216,7 +216,13 @@ def edit_profile():
 @login_required
 def admin_index():
     if current_user.role == "admin":
-        return render_template('admin/index.html')
+        size = {"article": 0, "comment": 0, "category": 0, "tag": 0, "user": 0}
+        size['article'] = Article.query.filter_by(is_deleted=0).count()
+        size['comment'] = Comment.query.filter_by(is_deleted=0).count()
+        size['category'] = Category.query.filter_by(is_deleted=0).count()
+        size['tag'] = Tag.query.filter_by(is_deleted=0).count()
+        size['user'] = User.query.filter_by(is_deleted=0).count()
+        return render_template('admin/index.html', size=size)
     else:
         return redirect(url_for('index'))
 

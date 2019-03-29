@@ -29,6 +29,31 @@
 
 {% block content %}
 
-    test index!!!
+<main class="app-content">
+  <div class="row">
+      <div class="col-md-12">
+          <div class="tile">
+              <!-- <h3 class="tile-title"></h3> -->
+              <legend>网站概要</legend>
+              <form id="newForm">
+                  <div class="form-group">
+                      <label for="title" class="col-form-label col-form-label-lg">目前共有：</label>
+                      {% if size %}
+                      <div style="margin-left:40px;">
+                        <text style="font-size: 48px; width: 200px; color: #5BC0EB">{{ size.article }}</text><strong style="font-size: 24px;">篇文章；</strong>
+                        <text style="font-size: 48px; width: 200px; color: #FDE74C"">{{ size.comment }}</text><strong style="font-size: 24px;">个评论；</strong>
+                        <text style="font-size: 48px; width: 200px; color: #9BC53D"">{{ size.category }}</text><strong style="font-size: 24px;">个分类；</strong>
+                        <text style="font-size: 48px; width: 200px; color: #E55934"">{{ size.tag }}</text><strong style="font-size: 24px;">个标签；</strong>
+                        <text style="font-size: 48px; width: 200px; color: #FA7921"">{{ size.user }}</text><strong style="font-size: 24px;">个用户；</strong>
+                      </div>
+                      {% endif %}
+                  </div>
+              </form>
+
+          </div>
+      </div>
+
+  </div>
+</main>
 
 {% endblock %}
