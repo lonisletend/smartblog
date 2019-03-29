@@ -57,7 +57,7 @@
                         {% if articleList %}
                         {% for article in articleList %}
                         <tr>
-                            <td>{{ article.id }}</td>
+                            <td>{{ loop.index }}</td>
                             <td>{{ article.date }}</td>
                             <td><a href="{{ url_for('profile', username=article.author) }}">{{ article.author }}</a></td>
                             <td><a href="{{ url_for('article', artid=article.id) }}">{{ article.title }}</a></td>
