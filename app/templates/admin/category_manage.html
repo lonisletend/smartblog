@@ -1,0 +1,272 @@
+{% extends "admin/base.html" %}
+
+<!-- 自定义CSS -->
+{% block headcss %}
+<link rel="stylesheet" href="../../static/admin/tagify/tagify.css">
+<link rel="stylesheet" href="../../static/admin/css/prism.min.css"> 
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.min.css">  -->
+{% endblock %} 
+
+{% block appmenu %}
+<ul class="app-menu">
+    <li><a class="app-menu__item" href="{{ url_for('admin_index') }}"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
+    <li><a class="app-menu__item" href="{{ url_for('admin_new') }}"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
+    <li class="treeview is-expanded"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <ul class="treeview-menu">
+            <li><a class="treeview-item" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
+            <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
+            <li><a class="treeview-item active" href="{{ url_for('category_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
+        </ul>
+    </li>
+    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <ul class="treeview-menu">
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Notifications</a></li>
+        </ul>
+    </li>
+    <li><a class="app-menu__item" href="charts.html"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
+
+
+</ul>
+{% endblock %} {% block content %}
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <!-- <h3 class="tile-title"></h3> -->
+                <legend>分类管理</legend>
+                <div class="tile">
+                    <h3 class="tile-title">所有分类</h3>
+                    <button data-toggle="modal" data-dismiss="modal" data-target="#cate-add" class="btn btn-outline-primary" type="button">新增分类</button>
+                    <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>名称</th>
+                            <th>文章数</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                          </tr>
+                        </thead>
+                        {% if cates %}
+                        <tbody>
+                        {% for cate in cates %}
+                          <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ cate.name }}</td>
+                            <td>{{ cate.art_num }}</td>
+                            <td>
+                                {% if cate.is_shown==1 %}
+                                <span style="color: #1fab89"><strong>显示</strong></span>
+                                {% elif cate.is_shown==0 %}
+                                <span style="color: #fe5f55"><strong>隐藏</strong></span>
+                                {% endif %}
+                            </td>
+                            <th>
+                                <a id="e{{ cate.id }}" class="edit" href="#" data-toggle="modal" data-dismiss="modal">编辑</a>&nbsp;&nbsp;
+                                {% if cate.is_shown==0 %}
+                                <a href="" style="color: #028090">显示</a>
+                                {% elif cate.is_shown==1 %}
+                                <a href="" style="color: #028090">隐藏</a>
+                                {% endif %}&nbsp;&nbsp;
+                                <a href="" style="color: #FF1654">删除</a>
+                            </th>
+                          </tr>
+                        {% endfor %}
+                        </tbody>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <ul class="pagination justify-content-center mb-4">
+                    {% if prev_url %}
+                    <li class="page-item">
+                    <a class="page-link" href="{{ prev_url }}">&larr; 上一页</a>
+                    </li>
+                    {% endif %}
+                    {% if next_url %}
+                    <li class="page-item">
+                    <a class="page-link" href="{{ next_url }}">下一页 &rarr;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- 新增分类模态框 -->
+<div id="cate-add" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form id="cate-add-form" class="form-group">
+                        <br>
+                        <div class="form-group row">
+                                <label class="control-label col-md-3" style="font-size: 18px; margin-top: 4px;">新增分类：</label>
+                                <div class="col-md-8">
+                                  <input id="cate-name" name="cate-name" class="form-control" type="text" placeholder="请填写分类名称">
+                                </div>
+                              </div>
+                        <div id="addfail" class="alert alert-danger" style="display: none;">
+                            <!-- <strong>添加失败：</strong> -->
+                        </div>
+                        <div id="addsuccess" class="alert alert-success" style="display: none;">
+                            <!-- <strong>添加成功：</strong> -->
+                        </div>
+                        <div class="text-right text-inline">
+                            <button id="addbtn" type="button" class="btn btn-primary">确认</button>
+                            <button class="btn btn-danger" data-dismiss="modal">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 编辑分类模态框 -->
+<div id="cate-edit" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form id="loginForm" class="form-group">
+                        <div class="form-group row">
+                                <label class="control-label col-md-3" style="font-size: 18px; margin-top: 4px;">分类名称：</label>
+                                <div class="col-md-8">
+                                  <input id="e-cate-name" name="e-cate-name"  class="form-control" type="text" value="Category Name">
+                                </div>
+                              </div>
+                        <div id="editfail" class="alert alert-danger" style="display: none;">
+                        </div>
+                        <div id="editsuccess" class="alert alert-success" style="display: none;">
+                        </div>
+                        <div class="text-right text-inline">
+                            <button id="editbtn" type="button" class="btn btn-primary">确认</button>
+                            <button class="btn btn-danger" data-dismiss="modal">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+<!-- Page specific javascripts-->
+{% block pagescript %}
+<script src="../../static/admin/js/plugins/sweetalert.min.js"></script>
+
+<script>
+
+    function isEmpty(obj){
+    if(obj==undefined || obj==null || obj==''){
+        return true;
+    }
+    return false;
+    }
+
+    $("#addbtn").click(function(){
+        cateName = $("#cate-name").val()
+
+        if(isEmpty(cateName)){
+            $("#addfail").html("<strong>添加失败：</strong>分类名称不能为空！")
+            $("#addfail").show();
+            setTimeout(function(){
+                $("#addfail").hide();
+                $("#addfail").html("");
+            }, 5000);
+            return false;
+        }
+
+        $.ajax({
+            url: '/category_add',
+            data: $('#cate-add-form').serialize(),
+            type: 'POST',
+            success: function(res){
+                if(res.status == true){
+                    $("#addsuccess").html("<strong>添加成功：</strong>"+res.msg);
+                    $("#addsuccess").show();
+                    setTimeout(function(){
+                        window.location.reload();
+                    }, 3000);
+                }else{
+                    $("#addfail").html("<strong>添加失败：</strong>"+res.msg)
+                    $("#addfail").show();
+                    setTimeout(function(){
+                        $("#addfail").hide();
+                        $("#addfail").html("");
+                    }, 5000);
+                    return false;
+                }
+            },
+            error: function(error){
+            console.log(error);
+            }
+        });
+    });
+
+    var cateId = undefined;
+    $(".edit").click(function(){
+        cateId = $(this).attr('id').replace("e","").trim();
+        var cateName = $(this).parent().parent().find("td").eq(1).html().trim();
+        // console.log(cateId);
+        // console.log(cateName);
+        $("#e-cate-name").val(cateName);
+        $("#cate-edit").modal("show");
+    });
+
+    $("#editbtn").click(function(){
+
+        cateName = $("#e-cate-name").val();
+
+        if(isEmpty(cateName)){
+            $("#editfail").html("<strong>修改失败：</strong>分类名称不能为空！")
+            $("#editfail").show();
+            setTimeout(function(){
+                $("#editfail").hide();
+                $("#editfail").html("");
+            }, 5000);
+            return false;
+        }
+
+        var editurl = "/category_edit/"+cateId;
+
+        $.ajax({
+            url: editurl,
+            data: $('#cate-edit-form').serialize(),
+            type: 'POST',
+            success: function(res){
+                if(res.status == true){
+                    $("#editsuccess").html("<strong>修改成功：</strong>"+res.msg);
+                    $("#editsuccess").show();
+                    setTimeout(function(){
+                        window.location.reload();
+                    }, 3000);
+                }else{
+                    $("#editfail").html("<strong>修改失败：</strong>"+res.msg)
+                    $("#editfail").show();
+                    setTimeout(function(){
+                        $("#editfail").hide();
+                        $("#editfail").html("");
+                    }, 5000);
+                    return false;
+                }
+            },
+            error: function(error){
+            console.log(error);
+            }
+        });
+
+    });
+
+    
+
+</script>
+
+{% endblock %}

@@ -230,7 +230,7 @@ def admin_index():
 @login_required
 def admin_new():
     if current_user.role == "vistor":
-        return render_template('/index')
+        return render_template('blog/index.html')
     else:
         if request.method == 'GET':
             cates = Category.query.filter_by(is_deleted=0).all()
@@ -319,6 +319,65 @@ def article_manage():
         articleList.append(copy.deepcopy(article))
     return render_template('admin/article_manage.html', articleList=articleList,
                             prev_url=prev_url, next_url=next_url)
+
+
+@app.route('/category_manage', methods=['POST', 'GET'])
+@login_required
+def category_manage():
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        categorys = Category.query.filter_by(is_deleted=0).all()
+        cate = {'id': 0, 'name': "", 'art_num': 0, 'is_shown': 1}
+        cates = []
+        for c in categorys:
+            cate['id'] = c.id
+            cate['name'] = c.name
+            cate['art_num'] = Article.query.filter_by(cate_id=c.id, is_deleted=0).count()
+            cate['is_shown'] = c.is_shown
+            cates.append(copy.deepcopy(cate))
+
+        return render_template('admin/category_manage.html', cates=cates)
+
+
+@app.route('/category_add', methods=['POST', 'GET'])
+@login_required
+def category_add():
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cateName = request.form['cate-name'].strip()
+        print(cateName)
+        category = Category.query.filter_by(name=cateName, is_deleted=0).first()
+        if category is not None:
+            return jsonify({'status': False, 'msg': '该分类已存在！'})
+        else:
+            cate = Category()
+            cate.name = cateName
+            db.session.add(cate)
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '正在刷新...'})
+
+
+@app.route('/category_edit/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_edit(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cateName = request.form['e-cate-name']
+        print(cateName)
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if(cate.name == cateName):
+            return jsonify({'status': False, 'msg': '不能与原分类名称相同！'})
+        cate = Category.query.filter_by(name=cateName, is_deleted=0).first()
+        if cate is not None:
+            return jsonify({'status': False, 'msg': '此分类已存在！'})
+        # Category.query.filter_by(id=cateid).update({
+        #     'name': cateName
+        # })
+        # db.session.commit()
+        return jsonify({'status': True, 'msg': '正在刷新...'})
 
 
 @app.route('/article_edit/<artid>', methods=['POST', 'GET'])
@@ -411,7 +470,7 @@ def article_edit(artid):
 @login_required
 def article_del(artid):
     if current_user.role == "vistor":
-        return render_template('/index')
+        return render_template('blog/index.html')
     else:
         # artid = request.form['artid']
         if artid is not None:
