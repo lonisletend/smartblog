@@ -1,0 +1,105 @@
+<p>我们知道文件都有文件名与数据，这在 Linux 上被分成两个部分：<strong>用户数据 (user data)</strong> 与<strong>元数据 (metadata)</strong>。</p>
+<p><strong>用户数据</strong>，即文件数据块 (data block)，数据块是记录文件真实内容的地方；
+<strong>元数据</strong>则是文件的附加属性，如文件名、文件大小、创建时间、所有者、文件所在的inode等信息。
+在 Linux 中，元数据中的 inode 号（inode 号即索引节点号）才是文件的唯一标识而非文件名。文件名仅是为了方便人们的记忆和使用，系统或程序通过 inode 号寻找正确的文件数据块。如图1：
+<a href='https://i.loli.net/2018/03/24/5ab6125bb0770.jpg'><img src='https://i.loli.net/2018/03/24/5ab6125bb0770.jpg' alt='image001.jpg' referrerPolicy='no-referrer' /></a>图1</p>
+<p>可以用<a href='http://man.linuxde.net/stat'>stat命令</a>或<a href='http://man.linuxde.net/ls'>ls -i</a>查看inode号。</p>
+<pre><code>[yangxjsun@ubuntu workspace]$ls
+c1  c2  test  test.txt
+[yangxjsun@ubuntu workspace]$stat test.txt 
+  文件：&#39;test.txt&#39;
+  大小：6         	块：8          IO 块：4096   普通文件
+设备：801h/2049d	Inode：2099625     硬链接：1
+权限：(0664/-rw-rw-r--)  Uid：( 1000/yangxjsun)   Gid：( 1000/yangxjsun)
+最近访问：2018-03-24 16:58:43.693982883 +0800
+最近更改：2018-03-24 16:58:35.981917820 +0800
+最近改动：2018-03-24 16:58:35.981917820 +0800
+创建时间：-
+[yangxjsun@ubuntu workspace]$mv test.txt hello.txt
+[yangxjsun@ubuntu workspace]$stat hello.txt
+  文件：&#39;hello.txt&#39;
+  大小：6         	块：8          IO 块：4096   普通文件
+设备：801h/2049d	Inode：2099625     硬链接：1
+权限：(0664/-rw-rw-r--)  Uid：( 1000/yangxjsun)   Gid：( 1000/yangxjsun)
+最近访问：2018-03-24 16:58:43.693982883 +0800
+最近更改：2018-03-24 16:58:35.981917820 +0800
+最近改动：2018-03-24 16:59:17.190260081 +0800
+创建时间：-
+[yangxjsun@ubuntu workspace]$
+</code></pre>
+<p>可以看到改变文件名之后inode不变。</p>
+<p>为解决文件的共享使用，Linux 系统引入了两种链接：硬链接 (hard link) 与软链接（又称符号链接，即 soft link 或 symbolic link）。链接为 Linux 系统解决了文件的共享使用，还带来了隐藏文件路径、增加权限安全及节省存储等好处。那么软硬链接有什么区别呢？请看图2：
+<a href='https://i.loli.net/2018/03/24/5ab61595cace9.jpg'><img src='https://i.loli.net/2018/03/24/5ab61595cace9.jpg' alt='image002.jpg' referrerPolicy='no-referrer' /></a>图2</p>
+<p><strong>硬链接</strong>：硬链接是新的目录条目，其引用系统中的现有文件。文件系统中的每一文件默认具有一个硬链接。为节省空间，可以不复制文件，而创建引用同一文件的新硬链接。新硬链接如果在与现有硬链接相同的目录中创建，则需要有不同的文件名，否则需要在不同的目录中。指向同一文件的所有硬链接具有相同的权限、连接数、用户/组所有权、时间戳以及文件内容。指向同一文件内容的硬链接需要在相同的文件系统中。
+简单说，硬链接就是一个 inode 号对应多个文件。就是同一个文件使用了多个别名（上图中 hard link 就是 file 的一个别名，他们有共同的 inode）。
+<strong>创建硬链接</strong>：ln命令为现有文件创建新的硬链接。 
+ln  现有文件硬链接(文件名)  一个或多个新硬链接</p>
+<pre><code>[yangxjsun@ubuntu workspace]$ls -l newfile.txt 
+-rw-rw-r-- 1 yangxjsun yangxjsun 6 3月  24 17:40 newfile.txt
+[yangxjsun@ubuntu workspace]$ln newfile.txt newfile-hlink.txt 
+[yangxjsun@ubuntu workspace]$ls -l newfile.txt newfile-hlink.txt 
+-rw-rw-r-- 2 yangxjsun yangxjsun 6 3月  24 17:40 newfile-hlink.txt
+-rw-rw-r-- 2 yangxjsun yangxjsun 6 3月  24 17:40 newfile.txt
+</code></pre>
+<p>可以看出，新硬链接创建后，无法区别哪一现有硬链接是原始链接。</p>
+<pre><code>[yangxjsun@ubuntu workspace]$rm newfile.txt 
+[yangxjsun@ubuntu workspace]$ls -l newfile-hlink.txt 
+-rw-rw-r-- 1 yangxjsun yangxjsun 6 3月  24 17:40 newfile-hlink.txt
+[yangxjsun@ubuntu workspace]$cat newfile-hlink.txt 
+hello
+</code></pre>
+<p>即使原始链接被删除，使用新的硬链接依然可以访问原内容。</p>
+<p>由于硬链接是有着相同 inode 号仅文件名不同的文件，因此<strong>硬链接存在以下几点特性：</strong></p>
+<ul>
+<li>文件有相同的 inode 及 data block；</li>
+<li>只能对已存在的文件进行创建；</li>
+<li>不能交叉文件系统进行硬链接的创建；</li>
+<li>不能对目录进行创建，只可对文件创建；</li>
+<li>删除一个硬链接文件并不影响其他有相同 inode 号的文件。</li>
+
+</ul>
+<p><strong>第三条</strong>不能交叉文件系统进行硬链接的创建，为什么？
+inode 是随着文件的存在而存在，因此只有当文件存在时才可创建硬链接，即当 inode 存在且链接计数器（link count）不为 0 时。inode 号仅在各文件系统下是唯一的，当 Linux 挂载多个文件系统后将出现 inode 号重复的现象，因此硬链接创建时不可跨文件系统。
+<strong>第四条</strong>中不能对目录创建硬链接，为什么？
+简单说，如果针对文件做硬连接，等于针对这个文件对应的inode又做一个链接。所以硬链接等于是同一个inode对应多个文件名。对于目录来说，就是保存这些链接的一个inode。如果针对目录做硬链接，一个子目录的硬链接指向父目录的话，这样就循环了。现 Linux 文件系统中的目录均隐藏了两个个特殊的目录：当前目录（.）与父目录（..）。查看这两个特殊目录的inode号可知其实这两目录就是两个硬链接。若系统允许对目录创建硬链接，则会产生目录环。想要深入研究可以移步<a href='https://unix.stackexchange.com/questions/22394/why-are-hard-links-to-directories-not-allowed-in-unix-linux'>这里</a>。
+<br>
+<strong>软链接：</strong>（又称符号链接，即 soft link 或 symbolic link） 软链接与硬链接不同，若文件用户数据块中存放的内容是另一文件的路径名的指向，则该文件就是软连接。软链接就是一个普通文件，只是数据块内容有点特殊。软链接有着自己的 inode 号以及用户数据块。（见图2）软连接可以指向目录，而且软连接所指向的目录可以位于不同的文件系统中。
+<strong>创建软连接：</strong>   ln -s 命令创建软链接</p>
+<pre><code>[yangxjsun@ubuntu workspace]$ln -s /home/yangxjsun/workspace/newfile.txt newfile-slink.txt
+[yangxjsun@ubuntu workspace]$ls -l newfile.txt newfile-slink.txt 
+lrwxrwxrwx 1 yangxjsun yangxjsun 37 3月  24 19:27 newfile-slink.txt -&gt; /home/yangxjsun/workspace/newfile.txt
+-rw-rw-r-- 1 yangxjsun yangxjsun  6 3月  24 16:58 newfile.txt
+[yangxjsun@ubuntu workspace]$
+</code></pre>
+<p>当原始文件被删除之后，软链接依然会指向该文件，但目标已消失。这就是&quot;dangling link&quot;</p>
+<pre><code>[yangxjsun@ubuntu workspace]$rm newfile.txt 
+[yangxjsun@ubuntu workspace]$ls -l newfile-slink.txt 
+lrwxrwxrwx 1 yangxjsun yangxjsun 37 3月  24 19:30 newfile-slink.txt -&gt; /home/yangxjsun/workspace/newfile.txt
+[yangxjsun@ubuntu workspace]$cat newfile-slink.txt 
+cat: newfile-slink.txt: 没有那个文件或目录
+[yangxjsun@ubuntu workspace]$
+</code></pre>
+<p>软链接可以指向目录。而后软连接作为目录使用。可以通过cd正常更改到软连接目录。</p>
+<pre><code>[yangxjsun@ubuntu workspace]$ln -s /etc/ configs
+[yangxjsun@ubuntu workspace]$ls -d configs
+configs
+[yangxjsun@ubuntu workspace]$cd configs
+[yangxjsun@ubuntu configs]$ls 
+acpi                           host.conf                ppp
+adduser.conf                   hostname                 presage.xml
+alternatives                   hosts                    printcap
+anacrontab                     hosts.allow              profile
+...
+</code></pre>
+<p><strong>软链接特性：</strong></p>
+<ul>
+<li>软链接有自己的文件属性及权限等；</li>
+<li>可对不存在的文件或目录创建软链接；</li>
+<li>软链接可交叉文件系统；</li>
+<li>软链接可对文件或目录创建；</li>
+<li>创建软链接时，链接计数 i_nlink 不会增加；</li>
+<li>删除软链接并不影响被指向的文件，但若被指向的原文件被删除，则相关软连接被称为死链接或悬挂的软链接（即 dangling link，若被指向路径文件被重新创建，死链接可恢复为正常的软链接）。</li>
+
+</ul>
+<p>当然软链接的用户数据也可以是另一个软链接的路径，其解析过程是递归的。但需注意：软链接创建时原文件的路径指向使用绝对路径较好。使用相对路径创建的软链接被移动后该软链接文件将成为一个死链接，因为链接数据块中记录的亦是相对路径指向。</p>
+<p>参考链接<a href='https://www.ibm.com/developerworks/cn/linux/l-cn-hardandsymb-links/index.html#major2'>https://www.ibm.com/developerworks/cn/linux/l-cn-hardandsymb-links/index.html#major2</a></p>
