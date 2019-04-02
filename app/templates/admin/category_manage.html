@@ -69,11 +69,11 @@
                             <th>
                                 <a id="e{{ cate.id }}" class="edit" href="#" data-toggle="modal" data-dismiss="modal">编辑</a>&nbsp;&nbsp;
                                 {% if cate.is_shown==0 %}
-                                <a href="" style="color: #028090">显示</a>
+                                <a id="s{{ cate.id }}" class="show" href="javascript:void(0)" style="color: #028090">显示</a>
                                 {% elif cate.is_shown==1 %}
-                                <a href="" style="color: #028090">隐藏</a>
+                                <a id="h{{ cate.id }}" class="hide" href="javascript:void(0)" style="color: #028090">隐藏</a>
                                 {% endif %}&nbsp;&nbsp;
-                                <a href="" style="color: #FF1654">删除</a>
+                                <a id="d{{ cate.id }}" class="del" href="javascript:void(0)" style="color: #FF1654">删除</a>
                             </th>
                           </tr>
                         {% endfor %}
@@ -135,7 +135,8 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form id="loginForm" class="form-group">
+                    <form id="cate-edit-form" class="form-group">
+                        <br>
                         <div class="form-group row">
                                 <label class="control-label col-md-3" style="font-size: 18px; margin-top: 4px;">分类名称：</label>
                                 <div class="col-md-8">
@@ -180,7 +181,7 @@
             setTimeout(function(){
                 $("#addfail").hide();
                 $("#addfail").html("");
-            }, 5000);
+            }, 3000);
             return false;
         }
 
@@ -201,7 +202,7 @@
                     setTimeout(function(){
                         $("#addfail").hide();
                         $("#addfail").html("");
-                    }, 5000);
+                    }, 3000);
                     return false;
                 }
             },
@@ -231,7 +232,7 @@
             setTimeout(function(){
                 $("#editfail").hide();
                 $("#editfail").html("");
-            }, 5000);
+            }, 3000);
             return false;
         }
 
@@ -247,14 +248,14 @@
                     $("#editsuccess").show();
                     setTimeout(function(){
                         window.location.reload();
-                    }, 3000);
+                    }, 2000);
                 }else{
                     $("#editfail").html("<strong>修改失败：</strong>"+res.msg)
                     $("#editfail").show();
                     setTimeout(function(){
                         $("#editfail").hide();
                         $("#editfail").html("");
-                    }, 5000);
+                    }, 3000);
                     return false;
                 }
             },
@@ -265,7 +266,132 @@
 
     });
 
-    
+    $(".show").click(function(){
+        cateId = $(this).attr('id').replace("s","").trim();
+        showurl = "/category_show/"+cateId;
+
+        swal({
+      		title: "确定将所选分类设为显示状态吗?",
+      		text: "设为显示后将在导航栏显示!",
+      		type: "warning",
+      		showCancelButton: true,
+      		confirmButtonText: "是，确认显示!",
+      		cancelButtonText: "不, 手抖了!",
+      		closeOnConfirm: false,
+      		closeOnCancel: false
+      	}, function(isConfirm) {
+      		if (isConfirm) {
+                $.ajax({
+                url: showurl,
+                type: 'GET',
+                success: function(res){
+                    //console.log(response);
+                    if(res.status == true){
+                        swal({title: "修改成功!", text: "已将所选分类设为显示状态", type: "success"},
+                            function(){ 
+                                location.reload();
+                            }
+                        );
+                    }else{
+                        swal("修改失败！", res.msg, "error");
+                    }
+                },
+                error: function(error){
+                    console.log(error);
+                }
+                });
+                
+      		} else {
+      			swal("取消显示", "显示操作已取消", "error");
+      		}
+      	});
+
+    });
+
+    $(".hide").click(function(){
+        cateId = $(this).attr('id').replace("h","").trim();
+        hideurl = "/category_hide/"+cateId;
+
+        swal({
+      		title: "确定将所选分类设为隐藏状态吗?",
+      		text: "设为隐藏后将不会在导航栏显示!",
+      		type: "warning",
+      		showCancelButton: true,
+      		confirmButtonText: "是，确认隐藏!",
+      		cancelButtonText: "不, 手抖了!",
+      		closeOnConfirm: false,
+      		closeOnCancel: false
+      	}, function(isConfirm) {
+      		if (isConfirm) {
+                $.ajax({
+                url: hideurl,
+                type: 'GET',
+                success: function(res){
+                    //console.log(response);
+                    if(res.status == true){
+                        swal({title: "修改成功!", text: "已将所选分类设为隐藏状态", type: "success"},
+                            function(){ 
+                                location.reload();
+                            }
+                        );
+                    }else{
+                        swal("修改失败！", res.msg, "error");
+                    }
+                },
+                error: function(error){
+                    console.log(error);
+                }
+                });
+                
+      		} else {
+      			swal("取消隐藏", "隐藏操作已取消", "error");
+      		}
+      	});
+
+    });
+
+    $(".del").click(function(){
+        cateId = $(this).attr('id').replace("d","").trim();
+        delurl = "/category_del/"+cateId;
+
+        swal({
+      		title: "确定删除所选分类吗?",
+      		text: "删除后不可恢复!",
+      		type: "warning",
+      		showCancelButton: true,
+      		confirmButtonText: "是，确认删除!",
+      		cancelButtonText: "不, 手抖了!",
+      		closeOnConfirm: false,
+      		closeOnCancel: false
+      	}, function(isConfirm) {
+      		if (isConfirm) {
+                $.ajax({
+                url: delurl,
+                type: 'GET',
+                success: function(res){
+                    //console.log(response);
+                    if(res.status == true){
+                        swal({title: "删除成功!", text: "已删除所选分类", type: "success"},
+                            function(){ 
+                                location.reload();
+                            }
+                        );
+                    }else{
+                        swal("删除失败！", res.msg, "error");
+                    }
+                },
+                error: function(error){
+                    console.log(error);
+                }
+                });
+                
+      		} else {
+      			swal("取消删除", "删除操作已取消", "error");
+      		}
+      	});
+
+    });
+
 
 </script>
 

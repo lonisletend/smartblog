@@ -352,11 +352,20 @@ def category_add():
         if category is not None:
             return jsonify({'status': False, 'msg': '该分类已存在！'})
         else:
-            cate = Category()
-            cate.name = cateName
-            db.session.add(cate)
-            db.session.commit()
-            return jsonify({'status': True, 'msg': '正在刷新...'})
+            # 存在已删除的，改为未删除
+            category = Category.query.filter_by(name=cateName, is_deleted=1).first()
+            if category is not None:
+                Category.query.filter_by(id=category.id).update({
+                    'is_deleted': 0
+                })
+                db.session.commit()
+                return jsonify({'status': True, 'msg': '正在刷新...'})
+            else:
+                cate = Category()
+                cate.name = cateName
+                db.session.add(cate)
+                db.session.commit()
+                return jsonify({'status': True, 'msg': '正在刷新...'})
 
 
 @app.route('/category_edit/<cateid>', methods=['POST', 'GET'])
@@ -366,18 +375,69 @@ def category_edit(cateid):
         return render_template('blog/index.html')
     else:
         cateName = request.form['e-cate-name']
-        print(cateName)
+        # print(cateName)
         cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
         if(cate.name == cateName):
             return jsonify({'status': False, 'msg': '不能与原分类名称相同！'})
         cate = Category.query.filter_by(name=cateName, is_deleted=0).first()
         if cate is not None:
             return jsonify({'status': False, 'msg': '此分类已存在！'})
-        # Category.query.filter_by(id=cateid).update({
-        #     'name': cateName
-        # })
-        # db.session.commit()
+        Category.query.filter_by(id=cateid).update({
+            'name': cateName
+        })
+        db.session.commit()
         return jsonify({'status': True, 'msg': '正在刷新...'})
+
+
+@app.route('/category_show/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_show(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if cate is None:
+            return jsonify({'status': False, 'msg': '此分类不存在！'})
+        else:
+            Category.query.filter_by(id=cateid).update({
+                'is_shown': 1
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '修改成功！'})
+
+
+@app.route('/category_hide/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_hide(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if cate is None:
+            return jsonify({'status': False, 'msg': '此分类不存在！'})
+        else:
+            Category.query.filter_by(id=cateid).update({
+                'is_shown': 0
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '修改成功！'})
+
+
+@app.route('/category_del/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_del(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if cate is None:
+            return jsonify({'status': False, 'msg': '此分类不存在！'})
+        else:
+            Category.query.filter_by(id=cateid).update({
+                'is_deleted': 1
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '删除成功！'})
 
 
 @app.route('/article_edit/<artid>', methods=['POST', 'GET'])
