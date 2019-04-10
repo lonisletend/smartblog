@@ -1,6 +1,8 @@
 # encoding: utf-8
+import re
 import copy
 from datetime import datetime
+from jieba import analyse
 from app import app
 from app import db
 from flask import render_template, request, jsonify, redirect, url_for
@@ -14,9 +16,6 @@ from app.models.tag import Tag
 from app.models.relation import Relation
 from app.models.comment import Comment
 
-
-
-
 # from app.models.user import User
 
 
@@ -25,6 +24,7 @@ def is_del(obj):
         return True
 
 
+# 首页
 @app.route('/')
 @app.route('/index')
 def index():
@@ -61,11 +61,13 @@ def index():
                             prev_url=prev_url, next_url=next_url)
 
 
+# 测试
 @app.route('/test')
 def test():
     return render_template('test/test.html')
 
 
+# 文章详情
 @app.route('/article/<artid>')
 def article(artid):
     loginForm = LoginForm()
@@ -112,6 +114,7 @@ def article(artid):
                             registrationForm=registrationForm, article=article, comments=comments)
 
 
+# 添加评论
 @app.route('/add_comment', methods=['POST', 'GET'])
 def add_comment():
     art_id = request.form['art_id']
@@ -135,6 +138,8 @@ def add_comment():
     db.session.commit()
     return jsonify({'status': True, 'msg': '添加评论成功！'})
 
+
+# 登录
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     username = request.form['username']
@@ -151,6 +156,7 @@ def login():
     return jsonify({'status': True, 'msg': '登录成功，正在跳转...'})
 
 
+# 注册
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     # if current_user.is_authenticated:
@@ -171,6 +177,7 @@ def register():
     return jsonify({'status': True, 'msg': '注册成功，正在跳转到登录页面...'})
 
 
+# 退出
 @app.route('/logout')
 @login_required
 def logout():
@@ -180,6 +187,7 @@ def logout():
     return jsonify({'status': True})
 
 
+# 个人信息
 @app.route('/profile/<username>')
 # @login_required
 def profile(username):
@@ -197,6 +205,7 @@ def profile(username):
                             user=user, comments=comments, auth=auth)
 
 
+# 个人信息编辑
 @app.route('/edit_profile', methods=['POST', 'GET'])
 @login_required
 def edit_profile():
@@ -211,7 +220,7 @@ def edit_profile():
     return jsonify({'status': True, 'msg': ''})
 
 
-
+# 后台首页
 @app.route('/admin_index')
 @login_required
 def admin_index():
@@ -226,6 +235,44 @@ def admin_index():
     else:
         return redirect(url_for('index'))
 
+
+# 文章管理
+@app.route('/article_manage', methods=['POST', 'GET'])
+@login_required
+def article_manage():
+    page = request.args.get('page', 1, type=int)
+
+    #分页查出所有可见(1)文章+倒序
+    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE_EDIT'], False)
+    next_url = url_for('article_manage', page=arts.next_num) \
+        if arts.has_next else None
+    prev_url = url_for('article_manage', page=arts.prev_num) \
+        if arts.has_prev else None
+    articleList = []
+    for art in arts.items:
+        article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0}
+        article['id'] = art.id
+        article['title'] = art.title
+        article['text'] = art.text
+        article['date'] = art.created.strftime("%Y-%m-%d")
+        user = User.query.filter_by(id=art.user_id).first()
+        article['author'] = user.username
+        article['views'] = art.views+1
+        cate = Category.query.filter_by(id=art.cate_id).first()
+        article['cateName'] = cate.name
+        # artdict['tags'] = []
+        res = Relation.query.filter_by(art_id=art.id, is_deleted=0).all()
+        for re in res:
+            tag = Tag.query.filter_by(id=re.tag_id).first()
+            article['tagNames'].append(copy.deepcopy(tag.name))
+        article['isTopping'] = art.is_topping
+        articleList.append(copy.deepcopy(article))
+    return render_template('admin/article_manage.html', articleList=articleList,
+                            prev_url=prev_url, next_url=next_url)
+
+
+# 新建文章
 @app.route('/admin_new', methods=['POST', 'GET'])
 @login_required
 def admin_new():
@@ -286,160 +333,7 @@ def admin_new():
             return jsonify({'status': True, 'msg': '发布成功，点击跳转到文章详情页！', 'artid':tempArticle.id})
 
 
-@app.route('/article_manage', methods=['POST', 'GET'])
-@login_required
-def article_manage():
-    page = request.args.get('page', 1, type=int)
-
-    #分页查出所有可见(1)文章+倒序
-    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
-        page, app.config['POSTS_PER_PAGE_EDIT'], False)
-    next_url = url_for('article_manage', page=arts.next_num) \
-        if arts.has_next else None
-    prev_url = url_for('article_manage', page=arts.prev_num) \
-        if arts.has_prev else None
-    articleList = []
-    for art in arts.items:
-        article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0}
-        article['id'] = art.id
-        article['title'] = art.title
-        article['text'] = art.text
-        article['date'] = art.created.strftime("%Y-%m-%d")
-        user = User.query.filter_by(id=art.user_id).first()
-        article['author'] = user.username
-        article['views'] = art.views+1
-        cate = Category.query.filter_by(id=art.cate_id).first()
-        article['cateName'] = cate.name
-        # artdict['tags'] = []
-        res = Relation.query.filter_by(art_id=art.id, is_deleted=0).all()
-        for re in res:
-            tag = Tag.query.filter_by(id=re.tag_id).first()
-            article['tagNames'].append(copy.deepcopy(tag.name))
-        article['isTopping'] = art.is_topping
-        articleList.append(copy.deepcopy(article))
-    return render_template('admin/article_manage.html', articleList=articleList,
-                            prev_url=prev_url, next_url=next_url)
-
-
-@app.route('/category_manage', methods=['POST', 'GET'])
-@login_required
-def category_manage():
-    if current_user.role == "vistor":
-        return render_template('blog/index.html')
-    else:
-        categorys = Category.query.filter_by(is_deleted=0).all()
-        cate = {'id': 0, 'name': "", 'art_num': 0, 'is_shown': 1}
-        cates = []
-        for c in categorys:
-            cate['id'] = c.id
-            cate['name'] = c.name
-            cate['art_num'] = Article.query.filter_by(cate_id=c.id, is_deleted=0).count()
-            cate['is_shown'] = c.is_shown
-            cates.append(copy.deepcopy(cate))
-
-        return render_template('admin/category_manage.html', cates=cates)
-
-
-@app.route('/category_add', methods=['POST', 'GET'])
-@login_required
-def category_add():
-    if current_user.role == "vistor":
-        return render_template('blog/index.html')
-    else:
-        cateName = request.form['cate-name'].strip()
-        print(cateName)
-        category = Category.query.filter_by(name=cateName, is_deleted=0).first()
-        if category is not None:
-            return jsonify({'status': False, 'msg': '该分类已存在！'})
-        else:
-            # 存在已删除的，改为未删除
-            category = Category.query.filter_by(name=cateName, is_deleted=1).first()
-            if category is not None:
-                Category.query.filter_by(id=category.id).update({
-                    'is_deleted': 0
-                })
-                db.session.commit()
-                return jsonify({'status': True, 'msg': '正在刷新...'})
-            else:
-                cate = Category()
-                cate.name = cateName
-                db.session.add(cate)
-                db.session.commit()
-                return jsonify({'status': True, 'msg': '正在刷新...'})
-
-
-@app.route('/category_edit/<cateid>', methods=['POST', 'GET'])
-@login_required
-def category_edit(cateid):
-    if current_user.role == "vistor":
-        return render_template('blog/index.html')
-    else:
-        cateName = request.form['e-cate-name']
-        # print(cateName)
-        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
-        if(cate.name == cateName):
-            return jsonify({'status': False, 'msg': '不能与原分类名称相同！'})
-        cate = Category.query.filter_by(name=cateName, is_deleted=0).first()
-        if cate is not None:
-            return jsonify({'status': False, 'msg': '此分类已存在！'})
-        Category.query.filter_by(id=cateid).update({
-            'name': cateName
-        })
-        db.session.commit()
-        return jsonify({'status': True, 'msg': '正在刷新...'})
-
-
-@app.route('/category_show/<cateid>', methods=['POST', 'GET'])
-@login_required
-def category_show(cateid):
-    if current_user.role == "vistor":
-        return render_template('blog/index.html')
-    else:
-        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
-        if cate is None:
-            return jsonify({'status': False, 'msg': '此分类不存在！'})
-        else:
-            Category.query.filter_by(id=cateid).update({
-                'is_shown': 1
-            })
-            db.session.commit()
-            return jsonify({'status': True, 'msg': '修改成功！'})
-
-
-@app.route('/category_hide/<cateid>', methods=['POST', 'GET'])
-@login_required
-def category_hide(cateid):
-    if current_user.role == "vistor":
-        return render_template('blog/index.html')
-    else:
-        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
-        if cate is None:
-            return jsonify({'status': False, 'msg': '此分类不存在！'})
-        else:
-            Category.query.filter_by(id=cateid).update({
-                'is_shown': 0
-            })
-            db.session.commit()
-            return jsonify({'status': True, 'msg': '修改成功！'})
-
-
-@app.route('/category_del/<cateid>', methods=['POST', 'GET'])
-@login_required
-def category_del(cateid):
-    if current_user.role == "vistor":
-        return render_template('blog/index.html')
-    else:
-        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
-        if cate is None:
-            return jsonify({'status': False, 'msg': '此分类不存在！'})
-        else:
-            Category.query.filter_by(id=cateid).update({
-                'is_deleted': 1
-            })
-            db.session.commit()
-            return jsonify({'status': True, 'msg': '删除成功！'})
-
-
+# 文章编辑
 @app.route('/article_edit/<artid>', methods=['POST', 'GET'])
 @login_required
 def article_edit(artid):
@@ -526,6 +420,7 @@ def article_edit(artid):
         return jsonify({'status': True, 'msg': '修改成功，点击跳转到文章详情页！', 'artid':artid})
 
 
+# 文章删除
 @app.route('/article_del/<artid>', methods=['POST', 'GET'])
 @login_required
 def article_del(artid):
@@ -544,6 +439,154 @@ def article_del(artid):
             return jsonify({'status': False, 'msg': '删除失败！文章不存在！'})
 
 
+# 分类管理
+@app.route('/category_manage', methods=['POST', 'GET'])
+@login_required
+def category_manage():
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        categorys = Category.query.filter_by(is_deleted=0).all()
+        cate = {'id': 0, 'name': "", 'art_num': 0, 'is_shown': 1}
+        cates = []
+        for c in categorys:
+            cate['id'] = c.id
+            cate['name'] = c.name
+            cate['art_num'] = Article.query.filter_by(cate_id=c.id, is_deleted=0).count()
+            cate['is_shown'] = c.is_shown
+            cates.append(copy.deepcopy(cate))
+
+        return render_template('admin/category_manage.html', cates=cates)
 
 
+# 分类添加
+@app.route('/category_add', methods=['POST', 'GET'])
+@login_required
+def category_add():
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cateName = request.form['cate-name'].strip()
+        print(cateName)
+        category = Category.query.filter_by(name=cateName, is_deleted=0).first()
+        if category is not None:
+            return jsonify({'status': False, 'msg': '该分类已存在！'})
+        else:
+            # 存在已删除的，改为未删除
+            category = Category.query.filter_by(name=cateName, is_deleted=1).first()
+            if category is not None:
+                Category.query.filter_by(id=category.id).update({
+                    'is_deleted': 0
+                })
+                db.session.commit()
+                return jsonify({'status': True, 'msg': '正在刷新...'})
+            else:
+                cate = Category()
+                cate.name = cateName
+                db.session.add(cate)
+                db.session.commit()
+                return jsonify({'status': True, 'msg': '正在刷新...'})
+
+
+# 分类编辑
+@app.route('/category_edit/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_edit(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cateName = request.form['e-cate-name']
+        # print(cateName)
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if(cate.name == cateName):
+            return jsonify({'status': False, 'msg': '不能与原分类名称相同！'})
+        cate = Category.query.filter_by(name=cateName, is_deleted=0).first()
+        if cate is not None:
+            return jsonify({'status': False, 'msg': '此分类已存在！'})
+        Category.query.filter_by(id=cateid).update({
+            'name': cateName
+        })
+        db.session.commit()
+        return jsonify({'status': True, 'msg': '正在刷新...'})
+
+
+# 分类展示
+@app.route('/category_show/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_show(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if cate is None:
+            return jsonify({'status': False, 'msg': '此分类不存在！'})
+        else:
+            Category.query.filter_by(id=cateid).update({
+                'is_shown': 1
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '修改成功！'})
+
+
+# 分类隐藏
+@app.route('/category_hide/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_hide(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if cate is None:
+            return jsonify({'status': False, 'msg': '此分类不存在！'})
+        else:
+            Category.query.filter_by(id=cateid).update({
+                'is_shown': 0
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '修改成功！'})
+
+
+# 分类删除
+@app.route('/category_del/<cateid>', methods=['POST', 'GET'])
+@login_required
+def category_del(cateid):
+    if current_user.role == "vistor":
+        return render_template('blog/index.html')
+    else:
+        cate = Category.query.filter_by(id=cateid, is_deleted=0).first()
+        if cate is None:
+            return jsonify({'status': False, 'msg': '此分类不存在！'})
+        else:
+            Category.query.filter_by(id=cateid).update({
+                'is_deleted': 1
+            })
+            db.session.commit()
+            return jsonify({'status': True, 'msg': '删除成功！'})
+
+
+
+# 生成标签
+@app.route('/generate_tags', methods=['POST', 'GET'])
+@login_required
+def generate_tags():
+    text = request.form['tmptext']
+    text = text_filter(text)
+    # print(text)
+    analyse.set_stop_words('./app/static/file/stop.txt')
+    tfidf = analyse.extract_tags
+    kws = tfidf(text)
+    tagstr = ','.join(kws[:3]);
+    print(tagstr)
+    return jsonify({'status': True, 'msg': 'success', 'tagstr':tagstr})
+
+
+# 文章内容过滤 除去代码段
+def text_filter(text):
+    text = text.replace('\n', '')
+    text = text.replace('\r', '')
+    text = text.replace("<code>","{")
+    text = text.replace("</code>","}")
+    a1 = re.compile(r'\{.*?\}' )
+    text = a1.sub('',text)
+    return text
 

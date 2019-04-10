@@ -1,4 +1,8 @@
 {
     "python.pythonPath": "venv/bin/python3",
-    "python.linting.pylintArgs": ["--load-plugins", "pylint_flask"]
+    "python.linting.pylintArgs": [
+        "--load-plugins",
+        "pylint_flask"
+    ],
+    "python.linting.pylintEnabled": true
 }
