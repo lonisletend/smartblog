@@ -63,7 +63,9 @@
                             </select>
                         </div>
                         <div class="form-group col-lg-6">
-                            <label for="tags" class="col-form-label col-form-label-lg">标签</label>
+                            <label for="tags" class="col-form-label col-form-label-lg">标签
+                                <button id="geneTags" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">智能生成标签</button>
+                            </label>
                             <input id="tags" name='tags' class='form-control col-lg-10' placeholder='输入标签并回车' value=''>
                         </div>
                     </div>
@@ -109,7 +111,12 @@
                     </div>
 
                 </form>
-
+                <form id="geneTagForm" style="display: none">
+                    <div class="form-group">
+                        <label for="text" class="col-form-label col-form-label-lg">正文</label>
+                        <textarea id="tmptext" name="tmptext" class="form-control" rows="15"></textarea>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -279,7 +286,44 @@
 
     });
 
+    $('#geneTags').click(function(){
+        $("#geneTags").attr('disabled',true);
+        $('#geneTags').html('标签生成中...');
+        // 去掉原生成的tag标签，重新生成   不是很优雅，需要改进
+        $('tags').remove();
 
+
+        // ajax提交文章内容tmptext，生成新标签返回
+        $('#tmptext').val($('#text').val());
+        // console.log($('#tmptext').val());
+        $.ajax({
+          url: '/generate_tags',
+          data: $('#geneTagForm').serialize(),
+          type: 'POST',
+          success: function(res){
+            if(res.status == true){
+                // alert(res.msg);
+                $('#tags').val(res.tagstr);
+                // $('#tags').val("test1,test2,test3");
+                var input = document.querySelector('input[name=tags]'),
+                // init Tagify script on the above inputs
+                tagify = new Tagify(input, {
+                    whitelist: ["C++", "Java", "Linux", "Modal"],
+                    blacklist: [] 
+                });
+                $('#geneTags').html('标签已生成！');
+            }else{
+                $("#geneTags").attr('disabled',false);
+                $('#geneTags').html('智能生成标签');
+                alert('标签生成失败，请重新尝试！');
+            }
+          },
+          error: function(error){
+            console.log(error);
+          }
+        });
+
+    });
 
 
 </script>
