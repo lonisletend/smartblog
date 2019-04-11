@@ -1,5 +1,15 @@
 {% extends "/blog/base.html" %}
 
+{% block headcss %}
+<!-- <style>
+    html, body, #cloud {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+</style> -->
+{% endblock %}
+
 {% block content %}
     <!-- 文章明细主体页面 包括文章头,信息,主体,评论,右侧部件 -->
     {% include "blog/_article_page.html" %}
@@ -12,19 +22,58 @@
 {% block tailscript %}
   <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
   <script src="../../static/blog/js/modal_redirect.js"></script>
-  <!-- <script>
-      $(document).ready(function(){
-        $('#lcomplain').hide();
-        $('#lsuccess').hide();
-        $('#lfail').hide();
-        $('#rcomplain').hide();
-        $('#rsuccess').hide();
-        $('#rfail').hide();
-
-      });
-  </script> -->
   <script src="../../static/blog/js/login_register.js"></script>
   <script src="../../static/blog/js/article_comment.js"></script>
+  <script src="../../static/blog/js/echarts.simple.js"></script>
+  <script src="../../static/blog/js/echarts-wordcloud.js"></script>
+  
+  <script>
+    $(document).ready(function(){
+        $('#cloud').height('220px');
+        $('#cloud').width('100%');
+        var chart = echarts.init(document.getElementById('cloud'));
+
+        // var jsondata = [{"name": "\u94fe\u63a5", "value": 1064}, {"name": "\u6587\u4ef6", "value": 457}, {"name": "inode", "value": 443}, {"name": "\u76ee\u5f55", "value": 298}, {"name": "\u521b\u5efa", "value": 270}, {"name": "link", "value": 199}, {"name": "\u6307\u5411", "value": 194}, {"name": "\u6587\u4ef6\u7cfb\u7edf", "value": 186}, {"name": "\u6587\u4ef6\u540d", "value": 158}, {"name": "https", "value": 155}, {"name": "Linux", "value": 133}, {"name": "href", "value": 133}, {"name": "net", "value": 133}, {"name": "jpg", "value": 133}, {"name": "\u6570\u636e", "value": 124}, {"name": "\u8fde\u63a5", "value": 102}, {"name": "loli", "value": 88}, {"name": "2018", "value": 88}, {"name": "03", "value": 88}, {"name": "24", "value": 88}, {"name": "cn", "value": 88}, {"name": "\u6b7b\u94fe\u63a5", "value": 77}, {"name": "\u7528\u6237", "value": 75}, {"name": "\u5220\u9664", "value": 71}, {"name": "data", "value": 66}, {"name": "hard", "value": 66}, {"name": "\u65b0\u786c", "value": 66}, {"name": "ln", "value": 66}, {"name": "com", "value": 66}, {"name": "links", "value": 66}, {"name": "linux", "value": 66}, {"name": "\u73b0\u6709", "value": 58}, {"name": "\u8def\u5f84", "value": 57}, {"name": "\u5185\u5bb9", "value": 57}, {"name": "\u591a\u4e2a", "value": 56}, {"name": "\u539f\u6587\u4ef6", "value": 51}, {"name": "\u6587\u4ef6\u521b\u5efa", "value": 49}, {"name": "\u6743\u9650", "value": 48}, {"name": "\u7cfb\u7edf", "value": 46}, {"name": "block", "value": 44}, {"name": "5ab6125bb0770", "value": 44}, {"name": "img", "value": 44}, {"name": "src", "value": 44}, {"name": "alt", "value": 44}, {"name": "referrerPolicy", "value": 44}, {"name": "no", "value": 44}, {"name": "referrer", "value": 44}, {"name": "http", "value": 44}, {"name": "man", "value": 44}, {"name": "linuxde", "value": 44}];
+        // var jsondata = $.parseJSON($('#cloudStr').val());
+        var jsondata = $.parseJSON($('#cloudStr').html());
+        console.log(jsondata);
+        console.log(typeof(jsondata));
+        // console.log(typeof(jsondata));
+
+        var option = {
+            tooltip: {},
+            series: [ {
+                type: 'wordCloud',
+                gridSize: 2,
+                sizeRange: [12, 50],
+                rotationRange: [-90, 90],
+                shape: 'pentagon',
+                width: 600,
+                height: 400,
+                drawOutOfBound: true,
+                textStyle: {
+                    normal: {
+                        color: function () {
+                            return 'rgb(' + [
+                                Math.round(Math.random() * 160),
+                                Math.round(Math.random() * 160),
+                                Math.round(Math.random() * 160)
+                            ].join(',') + ')';
+                        }
+                    },
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowColor: '#333'
+                    }
+                },
+                data: jsondata
+            } ]
+        };
+        chart.setOption(option);
+        // window.onresize = chart.resize;
+        })
+</script>
+
 
   <!-- <script>
       function isEmpty(obj){

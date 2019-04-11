@@ -49,11 +49,39 @@
                       {% endif %}
                   </div>
               </form>
-
+              <button id="jsonTest" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">Json Test</button>
           </div>
       </div>
 
   </div>
 </main>
+
+{% endblock %}
+
+{% block tailscript %}
+
+<script>
+  $('#jsonTest').click(function(){
+    $.ajax({
+      url: '/jsonTest',
+      type: 'GET',
+      success: function(res){
+          //console.log(response);
+          if(res.status == true){
+              alert(res.items);
+              console.log(res.items);
+          }else{
+              alert('test failed');
+          }
+      },
+      error: function(error){
+          console.log(error);
+      }
+      });
+  });
+
+
+
+</script>
 
 {% endblock %}

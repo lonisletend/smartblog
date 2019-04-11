@@ -49,11 +49,23 @@
             </div>
         </div>
 
-        <!-- Side Widget -->
+        <!-- 词云模块 与文章对应 仅在文章详情页显示 -->
+        {% if article %}
         <div class="card my-4">
             <h5 class="card-header">词云</h5>
             <div class="card-body">
-            You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
+                {% autoescape false %}
+                <span id="cloudStr" style="display:none;">{{ article.cloud }}</span>
+                {% endautoescape %}
+                <div id="cloud"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card my-4">
+            <h5 class="card-header">音乐</h5>
+            <div class="card-body">
+                <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=482141126&auto=0&height=66"></iframe>
             </div>
         </div>
 
