@@ -1,6 +1,7 @@
 # encoding: utf-8
 import re
 import copy
+import json
 from datetime import datetime
 from jieba import analyse
 from app import app
@@ -75,7 +76,7 @@ def article(artid):
 
     #返回文章详情信息
     art = Article.query.filter_by(id=artid).first()
-    article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0}
+    article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0, 'cloud': ''}
     article['id'] = art.id
     article['title'] = art.title
     article['text'] = art.text
@@ -91,7 +92,7 @@ def article(artid):
         tag = Tag.query.filter_by(id=re.tag_id).first()
         article['tagNames'].append(copy.deepcopy(tag.name))
     article['isTopping'] = art.is_topping
-    
+    article['cloud'] = art.wordcloud
     # 阅读数+1
     Article.query.filter_by(id=artid).update({
         'views': art.views+1
@@ -297,6 +298,7 @@ def admin_new():
             article.is_topping = request.form['is_topping']
             article.status = request.form['status']
             article.user_id = current_user.id
+            article.wordcloud = get_cloud(article.text)
             db.session.add(article)
             db.session.commit()
             tempArticle =  Article.query.filter_by(title=title).first()
@@ -374,12 +376,14 @@ def article_edit(artid):
         article.is_topping = request.form['is_topping']
         article.status = request.form['status']
         article.user_id = current_user.id
+        article.wordcloud = get_cloud(article.text)
         Article.query.filter_by(id=artid).update({
             'title': article.title,
             'text':  article.text,
             'cate_id': article.cate_id,
             'is_topping': article.is_topping,
-            'status': article.status
+            'status': article.status,
+            'wordcloud': article.wordcloud
         })
         db.session.commit()
         
@@ -589,4 +593,51 @@ def text_filter(text):
     a1 = re.compile(r'\{.*?\}' )
     text = a1.sub('',text)
     return text
+
+
+# jsonTest
+@app.route('/jsonTest', methods=['POST', 'GET'])
+@login_required
+def jsonTest():
+    analyse.set_stop_words('./app/jiebatest/stop.txt')
+
+    tfidf = analyse.extract_tags
+    textrank = analyse.textrank
+
+    with open("./app/jiebatest/doc.txt") as fileReader:
+        text = fileReader.read()
+
+    # 去除代码段
+    text = text_filter(text)
+    kws = tfidf(text,withWeight=True, topK=50)
+    data = {'name': '', 'value': 0}
+    datas = []
+    for kw in kws:
+        data['name'] = kw[0]
+        data['value'] = int(kw[1]*1000)
+        datas.append(copy.deepcopy(data))
+    # print(datas)
+    items = json.dumps(datas)
+    return jsonify({'status': True, 'items': items})
+
+
+def get_cloud(text):
+    analyse.set_stop_words('./app/jiebatest/stop.txt')
+    tfidf = analyse.extract_tags
+    # textrank = analyse.textrank
+    # with open("./app/jiebatest/doc.txt") as fileReader:
+    #     text = fileReader.read()
+
+    # 去除代码段
+    text = text_filter(text)
+    kws = tfidf(text,withWeight=True, topK=50)
+    data = {'name': '', 'value': 0}
+    datas = []
+    for kw in kws:
+        data['name'] = kw[0]
+        data['value'] = int(kw[1]*1000)
+        datas.append(copy.deepcopy(data))
+    # print(datas)
+    items = json.dumps(datas)
+    return items
 
