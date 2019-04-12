@@ -31,6 +31,10 @@ def is_del(obj):
 def index():
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
+    cateId = 0
+
+    # 导航栏
+    cates = get_categorys()
 
     #文章分页
     page = request.args.get('page', 1, type=int)
@@ -57,9 +61,50 @@ def index():
         artdict['isTopping'] = art.is_topping
         articleList.append(copy.deepcopy(artdict))
 
-    return render_template('blog/index.html', title="Index", loginForm=loginForm, 
-                            registrationForm=registrationForm, articleList=articleList,
+    return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
+                            loginForm=loginForm,registrationForm=registrationForm, articleList=articleList,
                             prev_url=prev_url, next_url=next_url)
+
+
+# 分类首页
+@app.route('/category/<catename>')
+def category(catename):
+    # 查出分类id
+    cateId = Category.query.filter_by(name=catename).first().id
+
+    loginForm = LoginForm()
+    registrationForm = RegistrationForm()
+    # 导航栏
+    cates = get_categorys()
+    #文章分页
+    page = request.args.get('page', 1, type=int)
+
+    #分页查出该分类所有可见(1)文章+倒序
+    arts = Article.query.filter_by(cate_id=cateId, status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('index', page=arts.next_num) \
+        if arts.has_next else None
+    prev_url = url_for('index', page=arts.prev_num) \
+        if arts.has_prev else None
+    articleList = []
+    for art in arts.items:
+        artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+        artdict['id'] = art.id
+        artdict['title'] = art.title
+        artdict['text'] = art.text[:200]
+        artdict['date'] = art.created.strftime("%Y-%m-%d")
+        user = User.query.filter_by(id=art.user_id).first()
+        artdict['author'] = user.username
+        artdict['views'] = art.views
+        cate = Category.query.filter_by(id=art.cate_id).first()
+        artdict['cateName'] = cate.name
+        artdict['isTopping'] = art.is_topping
+        articleList.append(copy.deepcopy(artdict))
+
+    return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
+                            loginForm=loginForm, registrationForm=registrationForm, articleList=articleList,
+                            prev_url=prev_url, next_url=next_url)
+
 
 
 # 测试
@@ -73,6 +118,8 @@ def test():
 def article(artid):
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
+
+    cates = get_categorys()
 
     #返回文章详情信息
     art = Article.query.filter_by(id=artid).first()
@@ -111,7 +158,7 @@ def article(artid):
         cmtdict['comment'] = cmt
         comments.append(copy.deepcopy(cmtdict))
 
-    return render_template('blog/article.html', title="Article", loginForm=loginForm, 
+    return render_template('blog/article.html', title="Article", cates=cates, loginForm=loginForm, 
                             registrationForm=registrationForm, article=article, comments=comments)
 
 
@@ -194,6 +241,7 @@ def logout():
 def profile(username):
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
+    cates = get_categorys()
 
     user = User.query.filter_by(username=username).first_or_404()
     if current_user.is_authenticated:
@@ -202,7 +250,7 @@ def profile(username):
     else:
         comments = []
         auth = False
-    return render_template('blog/profile.html', loginForm=loginForm, registrationForm=registrationForm,
+    return render_template('blog/profile.html', loginForm=loginForm, cates=cates, registrationForm=registrationForm,
                             user=user, comments=comments, auth=auth)
 
 
@@ -621,6 +669,7 @@ def jsonTest():
     return jsonify({'status': True, 'items': items})
 
 
+# 生成词云数据
 def get_cloud(text):
     analyse.set_stop_words('./app/jiebatest/stop.txt')
     tfidf = analyse.extract_tags
@@ -640,4 +689,10 @@ def get_cloud(text):
     # print(datas)
     items = json.dumps(datas)
     return items
+
+
+# 获取导航栏分类
+def get_categorys():
+    cates = Category.query.filter_by(is_shown=1, is_deleted=0).all()
+    return cates
 
