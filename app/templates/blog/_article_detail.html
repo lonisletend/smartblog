@@ -16,7 +16,7 @@
             </span>
             <span>
                 <img style="margin-bottom: 2px" src="../../static/blog/icons/cate.png" alt="分类" title="分类">
-                <span><a class="badge badge-secondary" href="#">{{ article.cateName }}</a> &nbsp;&nbsp;</span>
+                <span><a class="badge badge-secondary" href="{{ url_for('category',catename=article.cateName) }}">{{ article.cateName }}</a> &nbsp;&nbsp;</span>
             </span>
             <span>
                 <img style="margin-bottom: 2px" src="../../static/blog/icons/tag.png" alt="标签" title="标签">

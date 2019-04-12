@@ -21,7 +21,7 @@
                 <div class="card-footer text-muted">
                     发布时间：{{ article.date }} &nbsp;&nbsp;
                     作者：<a href="{{ url_for('profile', username=article.author) }}">{{ article.author }}</a> &nbsp;&nbsp;
-                    分类：<span class="badge badge-secondary">{{ article.cateName }}</span> &nbsp;&nbsp;
+                    分类：<a href="{{ url_for('category', catename=article.cateName) }}"><span class="badge badge-secondary">{{ article.cateName }}</span></a> &nbsp;&nbsp;
                     阅读数： <span class="text-primary">{{ article.views }}</span>
                 </div>
             </div>
