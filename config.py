@@ -14,3 +14,6 @@ class Config(object):
 
     #文章编辑页最大文章数，超过分页
     POSTS_PER_PAGE_EDIT = 10
+
+    # 全文索引
+    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')

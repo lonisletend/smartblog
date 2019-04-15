@@ -5,6 +5,7 @@ from datetime import datetime
 # from app.models import tag
 
 class Article(db.Model):
+    __searchable__ = ['text']
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
     text = db.Column(db.String(16000000))
