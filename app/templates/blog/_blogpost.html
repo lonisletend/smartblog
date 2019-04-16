@@ -2,7 +2,9 @@
     <div class="col-md-8">
 
         <h1 class="my-4">
-            <small></small>
+            {% if search %}
+            <small>共有{{ total }}篇与"{{ q }}"有关的文章</small>
+            {% endif %}
         </h1>
         <!-- Blog Post -->
 
