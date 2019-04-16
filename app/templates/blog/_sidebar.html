@@ -6,10 +6,16 @@
             <h5 class="card-header">全局搜索</h5>
             <div class="card-body">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="输入关键字">
-                <span class="input-group-btn">
-                <button class="btn btn-secondary" type="button">搜索</button>
-                </span>
+                <!-- <form id="search-form"> -->
+                    {% if q %}
+                    <input id="search-text" name="search-text" type="text" class="form-control" value="{{ q }}">
+                    {% else %}
+                    <input id="search-text" name="search-text" type="text" class="form-control" placeholder="输入关键字">
+                    {% endif %}
+                    <span class="input-group-btn">
+                    <button id="search-btn" class="btn btn-secondary" type="button">搜索</button>
+                    </span>
+                <!-- </form> -->
             </div>
             </div>
         </div>

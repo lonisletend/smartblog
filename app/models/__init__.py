@@ -1,1 +1,1 @@
-__all__=['user, article, category, relation, tag, comment']
+__all__=['user, article, category, relation, tag, comment,searchableMixin']

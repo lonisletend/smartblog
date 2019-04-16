@@ -6,7 +6,7 @@ from datetime import datetime
 from jieba import analyse
 from app import app
 from app import db
-from flask import render_template, request, jsonify, redirect, url_for
+from flask import render_template, request, jsonify, redirect, url_for, g
 from app.forms.login_form import LoginForm
 from app.forms.registeration_form import RegistrationForm
 from flask_login import current_user, login_user, login_required, logout_user
@@ -696,3 +696,38 @@ def get_categorys():
     cates = Category.query.filter_by(is_shown=1, is_deleted=0).all()
     return cates
 
+@app.route('/search', methods=['POST', 'GET'])
+def search():
+    loginForm = LoginForm()
+    registrationForm = RegistrationForm()
+    cates = get_categorys()
+    page = request.args.get('page', 1, type=int)
+
+    q = request.args.get('q')
+
+    # Article.reindex()
+    articles, total = Article.search(q, page, app.config['POSTS_PER_PAGE'])
+
+    articleList = []
+    artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+    for art in articles:
+        artdict['id'] = art.id
+        artdict['title'] = art.title
+        artdict['text'] = art.text[:200]
+        artdict['date'] = art.created.strftime("%Y-%m-%d")
+        user = User.query.filter_by(id=art.user_id).first()
+        artdict['author'] = user.username
+        artdict['views'] = art.views
+        cate = Category.query.filter_by(id=art.cate_id).first()
+        artdict['cateName'] = cate.name
+        artdict['isTopping'] = art.is_topping
+        articleList.append(copy.deepcopy(artdict))
+    
+    next_url = url_for('search', q=q, page=page + 1) \
+        if total > page * app.config['POSTS_PER_PAGE'] else None
+    prev_url = url_for('search', q=q, page=page - 1) \
+        if page > 1 else None
+
+    return render_template('blog/index.html', cates=cates, loginForm=loginForm, registrationForm=registrationForm,
+                            q=q, search=1, total=total, articleList=articleList, 
+                            prev_url=prev_url, next_url=next_url)

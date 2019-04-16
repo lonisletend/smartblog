@@ -16,16 +16,23 @@
 {% block tailscript %}
   <!-- 注册登录模态框相互跳转使用js防止出现滚动条隐藏模态框抖动 -->
   <script src="../../static/blog/js/modal_redirect.js"></script>
-  <!-- <script>
-    $(document).ready(function(){
-      $('#lcomplain').hide();
-      $('#lsuccess').hide();
-      $('#lfail').hide();
-      $('#rcomplain').hide();
-      $('#rsuccess').hide();
-      $('#rfail').hide();
-
-    });
-  </script> -->
   <script src="../../static/blog/js/login_register.js"></script>
+
+  <script>
+    function isEmpty(obj){
+      if(obj==undefined || obj==null || obj==''){
+        return true;
+      }
+      return false;
+    }
+
+    $("#search-btn").click(function(){
+      stext = $("#search-text").val();
+      window.location.href = "/search?q="+stext;
+
+
+
+    })
+  </script>
+
 {% endblock %}

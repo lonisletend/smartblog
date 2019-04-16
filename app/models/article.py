@@ -1,10 +1,12 @@
 # encoding: utf-8
 from app import db
 from datetime import datetime
+# from app.models import searchableMixin
+from app.models.searchableMixin import SearchableMixin
 # from app.models import relation
 # from app.models import tag
 
-class Article(db.Model):
+class Article(SearchableMixin, db.Model):
     __searchable__ = ['text']
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
@@ -20,3 +22,5 @@ class Article(db.Model):
     wordcloud = db.Column(db.String(10240)) # 词云数据 json字符串
     is_deleted = db.Column(db.Integer, default=0)
     
+    def __repr__(self):
+        return '<Article {}>'.format(self.title)
