@@ -705,7 +705,7 @@ def search():
 
     q = request.args.get('q')
 
-    # Article.reindex()
+    Article.reindex()
     articles, total = Article.search(q, page, app.config['POSTS_PER_PAGE'])
 
     articleList = []
