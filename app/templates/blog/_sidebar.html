@@ -8,9 +8,9 @@
             <div class="input-group">
                 <!-- <form id="search-form"> -->
                     {% if q %}
-                    <input id="search-text" name="search-text" type="text" class="form-control" value="{{ q }}">
+                    <input id="search-text" name="search-text" onkeyup=" if(event.keyCode==13) { search(); }" type="text" class="form-control" value="{{ q }}">
                     {% else %}
-                    <input id="search-text" name="search-text" type="text" class="form-control" placeholder="输入关键字">
+                    <input id="search-text" name="search-text" onkeyup=" if(event.keyCode==13) { search(); }" type="text" class="form-control" placeholder="输入关键字">
                     {% endif %}
                     <span class="input-group-btn">
                     <button id="search-btn" class="btn btn-secondary" type="button">搜索</button>
