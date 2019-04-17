@@ -1,4 +1,5 @@
 # encoding: utf-8
+import os
 import re
 import copy
 import json
@@ -696,6 +697,7 @@ def get_categorys():
     cates = Category.query.filter_by(is_shown=1, is_deleted=0).all()
     return cates
 
+
 @app.route('/search', methods=['POST', 'GET'])
 def search():
     loginForm = LoginForm()
@@ -705,8 +707,18 @@ def search():
 
     q = request.args.get('q')
 
-    Article.reindex()
-    articles, total = Article.search(q, page, app.config['POSTS_PER_PAGE'])
+    # 需要做判断，做两种查询的兼容
+    if os.environ.get('ELASTICSEARCH_URL') is not None:
+        # Article.reindex()
+        articles, total = Article.search(q, page, app.config['POSTS_PER_PAGE'])
+    else:
+        # arts = Article.query.filter(Article.text.ilike('%%{}%%'.format(q))).filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        #         page, app.config['POSTS_PER_PAGE'], False)
+        arts = Article.query.filter(Article.text.ilike('%%{}%%'.format(q))).filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+                page, app.config['POSTS_PER_PAGE'], False)
+        articles = arts.items
+        total = Article.query.filter(Article.text.ilike('%%{}%%'.format(q))).filter_by(status=1, is_deleted=0).count()
+        print(total)
 
     articleList = []
     artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
