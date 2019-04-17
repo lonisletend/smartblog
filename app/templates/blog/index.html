@@ -33,6 +33,11 @@
 
     function search(){
       stext = $("#search-text").val();
+      if (isEmpty(stext)){
+        $("#search-text").attr("placeholder","输入关键字");
+        $("#search-text").focus();
+        return false;
+      }
       window.location.href = "/search?q="+stext;
     }
 
