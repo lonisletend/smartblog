@@ -8,6 +8,7 @@ from jieba import analyse
 from app import app
 from app import db
 from flask import render_template, request, jsonify, redirect, url_for, g
+from sqlalchemy import or_
 from app.forms.login_form import LoginForm
 from app.forms.registeration_form import RegistrationForm
 from flask_login import current_user, login_user, login_required, logout_user
@@ -47,12 +48,62 @@ def index():
         if arts.has_next else None
     prev_url = url_for('index', page=arts.prev_num) \
         if arts.has_prev else None
+    articleList = get_article_list(arts.items)
+    # artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+    # prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
+    # suffix = ["</code>","</p>","</pre>"]
+    # for art in arts.items:
+    #     artdict['id'] = art.id
+    #     artdict['title'] = art.title
+    #     # artdict['text'] = art.text[:200]
+    #     text = art.text
+    #     for pre in prefix:
+    #         text = text.replace(pre, '')
+    #     for suf in suffix:
+    #         text = text.replace(suf, '<br>')
+    #     text = text.replace("<img","{")
+    #     text = text.replace(" />","}[图片]")
+    #     a1 = re.compile(r'\{.*?\}' )
+    #     text = a1.sub('',text)
+    #     artdict['text'] = text[:200]
+    #     print('------------artid={}------------------'.format(art.id))
+    #     print(artdict['text'])
+    #     print('------------------------------------------------')
+    #     artdict['date'] = art.created.strftime("%Y-%m-%d")
+    #     user = User.query.filter_by(id=art.user_id).first()
+    #     artdict['author'] = user.username
+    #     artdict['views'] = art.views
+    #     cate = Category.query.filter_by(id=art.cate_id).first()
+    #     artdict['cateName'] = cate.name
+    #     artdict['isTopping'] = art.is_topping
+    #     articleList.append(copy.deepcopy(artdict))
+
+    return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
+                            loginForm=loginForm,registrationForm=registrationForm, articleList=articleList,
+                            prev_url=prev_url, next_url=next_url)
+
+def get_article_list(articles):
     articleList = []
-    for art in arts.items:
-        artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+    artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+    prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
+    suffix = ["</code>","</p>","</pre>"]
+    for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        artdict['text'] = art.text[:200]
+        # artdict['text'] = art.text[:200]
+        text = art.text
+        for pre in prefix:
+            text = text.replace(pre, '')
+        for suf in suffix:
+            text = text.replace(suf, '<br>')
+        text = text.replace("<img","{")
+        text = text.replace(" />","}[图片]")
+        a1 = re.compile(r'\{.*?\}' )
+        text = a1.sub('',text)
+        artdict['text'] = text[:200]
+        # print('------------artid={}------------------'.format(art.id))
+        # print(artdict['text'])
+        # print('------------------------------------------------')
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
         artdict['author'] = user.username
@@ -61,11 +112,7 @@ def index():
         artdict['cateName'] = cate.name
         artdict['isTopping'] = art.is_topping
         articleList.append(copy.deepcopy(artdict))
-
-    return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=loginForm,registrationForm=registrationForm, articleList=articleList,
-                            prev_url=prev_url, next_url=next_url)
-
+    return articleList
 
 # 分类首页
 @app.route('/category/<catename>')
@@ -83,24 +130,31 @@ def category(catename):
     #分页查出该分类所有可见(1)文章+倒序
     arts = Article.query.filter_by(cate_id=cateId, status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('index', page=arts.next_num) \
+    next_url = url_for('category', catename=catename, page=arts.next_num) \
         if arts.has_next else None
-    prev_url = url_for('index', page=arts.prev_num) \
+    prev_url = url_for('category', catename=catename, page=arts.prev_num) \
         if arts.has_prev else None
-    articleList = []
-    for art in arts.items:
-        artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
-        artdict['id'] = art.id
-        artdict['title'] = art.title
-        artdict['text'] = art.text[:200]
-        artdict['date'] = art.created.strftime("%Y-%m-%d")
-        user = User.query.filter_by(id=art.user_id).first()
-        artdict['author'] = user.username
-        artdict['views'] = art.views
-        cate = Category.query.filter_by(id=art.cate_id).first()
-        artdict['cateName'] = cate.name
-        artdict['isTopping'] = art.is_topping
-        articleList.append(copy.deepcopy(artdict))
+    articleList = get_article_list(arts.items)
+    # artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+    # prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
+    # suffix = ["</code>","</p>","</pre>"]
+    # for art in arts.items:
+    #     artdict['id'] = art.id
+    #     artdict['title'] = art.title
+    #     text = art.text[:200]
+    #     for pre in prefix:
+    #         text = text.replace(pre, '')
+    #     for suf in suffix:
+    #         text = text.replace(suf, '<br>')
+    #     artdict['text'] = text
+    #     artdict['date'] = art.created.strftime("%Y-%m-%d")
+    #     user = User.query.filter_by(id=art.user_id).first()
+    #     artdict['author'] = user.username
+    #     artdict['views'] = art.views
+    #     cate = Category.query.filter_by(id=art.cate_id).first()
+    #     artdict['cateName'] = cate.name
+    #     artdict['isTopping'] = art.is_topping
+    #     articleList.append(copy.deepcopy(artdict))
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
                             loginForm=loginForm, registrationForm=registrationForm, articleList=articleList,
@@ -714,26 +768,33 @@ def search():
     else:
         # arts = Article.query.filter(Article.text.ilike('%%{}%%'.format(q))).filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
         #         page, app.config['POSTS_PER_PAGE'], False)
-        arts = Article.query.filter(Article.text.ilike('%%{}%%'.format(q))).filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        arts = Article.query.filter(or_(Article.text.ilike('%%{}%%'.format(q)), Article.title.ilike('%%{}%%'.format(q)))).filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
                 page, app.config['POSTS_PER_PAGE'], False)
         articles = arts.items
-        total = Article.query.filter(Article.text.ilike('%%{}%%'.format(q))).filter_by(status=1, is_deleted=0).count()
-        print(total)
+        total = Article.query.filter(or_(Article.text.ilike('%%{}%%'.format(q)), Article.title.ilike('%%{}%%'.format(q)))).filter_by(status=1, is_deleted=0).count()
+        # print(total)
 
-    articleList = []
-    artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
-    for art in articles:
-        artdict['id'] = art.id
-        artdict['title'] = art.title
-        artdict['text'] = art.text[:200]
-        artdict['date'] = art.created.strftime("%Y-%m-%d")
-        user = User.query.filter_by(id=art.user_id).first()
-        artdict['author'] = user.username
-        artdict['views'] = art.views
-        cate = Category.query.filter_by(id=art.cate_id).first()
-        artdict['cateName'] = cate.name
-        artdict['isTopping'] = art.is_topping
-        articleList.append(copy.deepcopy(artdict))
+    articleList = get_article_list(articles)
+    # artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
+    # prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
+    # suffix = ["</code>","</p>","</pre>"]
+    # for art in articles:
+    #     artdict['id'] = art.id
+    #     artdict['title'] = art.title
+    #     text = art.text[:200]
+    #     for pre in prefix:
+    #         text = text.replace(pre, '')
+    #     for suf in suffix:
+    #         text = text.replace(suf, '<br>')
+    #     artdict['text'] = text
+    #     artdict['date'] = art.created.strftime("%Y-%m-%d")
+    #     user = User.query.filter_by(id=art.user_id).first()
+    #     artdict['author'] = user.username
+    #     artdict['views'] = art.views
+    #     cate = Category.query.filter_by(id=art.cate_id).first()
+    #     artdict['cateName'] = cate.name
+    #     artdict['isTopping'] = art.is_topping
+    #     articleList.append(copy.deepcopy(artdict))
     
     next_url = url_for('search', q=q, page=page + 1) \
         if total > page * app.config['POSTS_PER_PAGE'] else None
