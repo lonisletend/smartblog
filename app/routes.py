@@ -3,7 +3,8 @@ import os
 import re
 import copy
 import json
-from datetime import datetime
+import time
+from datetime import datetime, timedelta, date
 from jieba import analyse
 from app import app
 from app import db
@@ -709,6 +710,19 @@ def get_categorys():
 
 @app.route('/search', methods=['POST', 'GET'])
 def search():
+    # test
+    print('ip={}'.format(request.remote_addr))
+    print('platform={}'.format(request.user_agent.platform))
+    print('browser={}'.format(request.user_agent.browser))
+    print('version={}'.format(request.user_agent.version))
+    print('language={}'.format(request.user_agent.language))
+
+    week_start, week_end = get_se_of_week()
+    print(week_start)
+    print(week_end)
+
+# ----------------------------------
+
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
     cates = get_categorys()
@@ -736,3 +750,12 @@ def search():
     return render_template('blog/index.html', cates=cates, loginForm=loginForm, registrationForm=registrationForm,
                             q=q, search=1, total=total, articleList=articleList, 
                             prev_url=prev_url, next_url=next_url)
+
+
+def get_se_of_week():
+    day_of_week = datetime.now().weekday()
+    today =  int(time.mktime(date.today().timetuple()))
+    start = datetime.fromtimestamp(today-day_of_week*86400)
+    end = datetime.fromtimestamp(today+(7-day_of_week)*86400-1)
+    return start, end
+
