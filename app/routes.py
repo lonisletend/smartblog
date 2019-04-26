@@ -758,6 +758,10 @@ def search():
 # 获取请求中的有关信息用于访问记录
 def get_reqinfo(request):
     ip = request.remote_addr
+    if ip is None:
+        ip = request.headers['X-Real-IP']
+    if ip is None:
+        ip = request.headers['X-Forwarded-For']
     platform = request.user_agent.platform
     browser = request.user_agent.browser
     version = request.user_agent.version
