@@ -724,6 +724,7 @@ def get_categorys():
     return cates
 
 
+# 全局搜索
 @app.route('/search', methods=['POST', 'GET'])
 def search():
     loginForm = LoginForm()
@@ -755,6 +756,40 @@ def search():
                             prev_url=prev_url, next_url=next_url)
 
 
+# 生成推荐标记
+@app.route('/getmark', methods=['GET'])
+def getmark():
+    print('='*30)
+    start, end = get_se_of_recent_month()
+    users = User.query.filter_by(is_deleted=0).all()
+    for user in users:
+        records = Record.query.filter(Record.rtime>start, Record.rtime<end).filter_by(user_id=user.id, is_deleted=0).all()
+        if records is None or len(records)==0:
+            continue
+        tags = []        
+        for record in records:
+            relations = Relation.query.filter_by(art_id=record.art_id, is_deleted=0).all()
+            for relation in relations:
+                tag = Tag.query.filter_by(id=relation.tag_id, is_deleted=0).first()
+                if tag is not None:
+                    tags.append(tag)
+        tag_dict = {}
+        for tag in tags:
+            # print('tag_id={}, name={}'.format(tag.id, tag.name))
+            if tag.id in tag_dict:
+                tag_dict[tag.id] += 1
+            else:
+                tag_dict[tag.id] = 1
+        # print(tag_dict)
+        max_tags = []
+        for i in range(3):
+            max_tag = max(tag_dict, key=tag_dict.get)
+            max_tags.append(max_tag)
+            tag_dict[max_tag] = 0
+        print(max_tags)
+    print('='*30)
+
+
 # 获取请求中的有关信息用于访问记录
 def get_reqinfo(request):
     ip = request.remote_addr
@@ -778,4 +813,11 @@ def get_se_of_week():
     end = datetime.fromtimestamp(today+(7-day_of_week)*86400-1)
     return start, end
 
+
+# 获取以今天结束的最近30天的开始和结束
+def get_se_of_recent_month():
+    today =  int(time.mktime(date.today().timetuple()))
+    start = datetime.fromtimestamp(today-259200)   # 30*86400 = 259200
+    end = datetime.fromtimestamp(today)
+    return start, end
 
