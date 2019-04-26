@@ -710,19 +710,6 @@ def get_categorys():
 
 @app.route('/search', methods=['POST', 'GET'])
 def search():
-    # test
-    print('ip={}'.format(request.remote_addr))
-    print('platform={}'.format(request.user_agent.platform))
-    print('browser={}'.format(request.user_agent.browser))
-    print('version={}'.format(request.user_agent.version))
-    print('language={}'.format(request.user_agent.language))
-
-    week_start, week_end = get_se_of_week()
-    print(week_start)
-    print(week_end)
-
-# ----------------------------------
-
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
     cates = get_categorys()
@@ -752,10 +739,22 @@ def search():
                             prev_url=prev_url, next_url=next_url)
 
 
+def get_reqinfo(request):
+    ip = request.remote_addr
+    platform = request.user_agent.platform
+    browser = request.user_agent.browser
+    version = request.user_agent.version
+    language = request.user_agent.language
+    return {'ip': ip, 'platform': platform, 'browser': browser, 'version': version, 'language': language,}
+
+
+
+# 获取一周的开始和结束  type：datetime
 def get_se_of_week():
     day_of_week = datetime.now().weekday()
     today =  int(time.mktime(date.today().timetuple()))
     start = datetime.fromtimestamp(today-day_of_week*86400)
     end = datetime.fromtimestamp(today+(7-day_of_week)*86400-1)
     return start, end
+
 

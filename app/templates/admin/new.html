@@ -285,6 +285,17 @@
     });
 
     $('#geneTags').click(function(){
+        if(isEmpty($('#text').val())){
+            $.notify({
+                title: "错误:",
+                message: "正文为空，不能生成标签！"
+            },{
+                type: 'danger'
+            });
+            $("#text").focus();
+            return false;
+        }
+
         $("#geneTags").attr('disabled',true);
         $('#geneTags').html('标签生成中...');
         // 去掉原生成的tag标签，重新生成   不是很优雅，可以改进
