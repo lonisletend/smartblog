@@ -17,6 +17,7 @@ class User(UserMixin,db.Model):
     logged = db.Column(db.DateTime, index=True, default=datetime.now)
     role = db.Column(db.String(16), index=True, default='vistor')   #admin
     is_deleted = db.Column(db.Integer, default=0) # 0=未删除， 1=已删除
+    mark = db.Column(db.String(256), index=True)
     
     def __repr__(self):
         return '<User {}>'.format(self.username) 

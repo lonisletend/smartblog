@@ -19,6 +19,7 @@ from app.models.article import Article
 from app.models.tag import Tag
 from app.models.relation import Relation
 from app.models.comment import Comment
+from app.models.record import Record
 
 # from app.models.user import User
 
@@ -127,8 +128,23 @@ def test():
 def article(artid):
     loginForm = LoginForm()
     registrationForm = RegistrationForm()
-
     cates = get_categorys()
+
+    # 添加访问记录
+    record = Record()
+    record.art_id = artid
+    if current_user.is_authenticated:
+        record.user_id = current_user.id
+        record.username = current_user.username
+
+    info = get_reqinfo(request)
+    record.ip = info['ip']
+    record.platform = info['platform']
+    record.browser = info['browser']
+    record.version = info['version']
+    record.language = info['language']
+    db.session.add(record)
+    db.session.commit()
 
     #返回文章详情信息
     art = Article.query.filter_by(id=artid).first()
@@ -739,6 +755,7 @@ def search():
                             prev_url=prev_url, next_url=next_url)
 
 
+# 获取请求中的有关信息用于访问记录
 def get_reqinfo(request):
     ip = request.remote_addr
     platform = request.user_agent.platform
