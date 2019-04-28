@@ -127,7 +127,7 @@ def get_article_list_by_weight(articles, user_id):
 
 # 计算文章对当前用户的权重
 def get_weight_of_article(user_id, art_id):
-    # 1-->1.2  2-->1.3  3-->1.5  a-->*0.67
+    # 1-->1.2  2-->1.3  3-->1.5  a-->*0.66
     weight = 1.0
     user = User.query.filter_by(id=user_id, is_deleted=0).first()
     markstr = user.mark
@@ -153,7 +153,7 @@ def get_weight_of_article(user_id, art_id):
     # 判断当前用户是否已经看过当前文章
     record = Record.query.filter_by(art_id=art_id, user_id=user_id, is_deleted=0).first()
     if record is not None:
-        weight *= 0.67
+        weight *= 0.66
     return weight
 
 
