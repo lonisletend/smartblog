@@ -51,7 +51,10 @@ def index():
     prev_url = url_for('index', page=arts.prev_num) \
         if arts.has_prev else None
     # 处理文章信息
-    articleList = get_article_list(arts.items)
+    if current_user.is_authenticated:
+        articleList = get_article_list_by_weight(arts.items, current_user.id)
+    else:
+        articleList = get_article_list(arts.items)
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
                             loginForm=loginForm,registrationForm=registrationForm, articleList=articleList,
@@ -88,6 +91,73 @@ def get_article_list(articles):
         artdict['isTopping'] = art.is_topping
         articleList.append(copy.deepcopy(artdict))
     return articleList
+
+def get_article_list_by_weight(articles, user_id):
+    articleList = []
+    artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0, 'weight':1.0}
+    prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
+    suffix = ["</code>","</p>","</pre>"]
+    for art in articles:
+        artdict['id'] = art.id
+        artdict['title'] = art.title
+        # artdict['text'] = art.text[:200]
+        text = art.text
+        for pre in prefix:
+            text = text.replace(pre, '')
+        for suf in suffix:
+            text = text.replace(suf, '<br>')
+        text = text.replace("<img","{")
+        text = text.replace(" />","}[图片]")
+        a1 = re.compile(r'\{.*?\}' )
+        text = a1.sub('',text)
+        artdict['text'] = text[:200]
+        artdict['date'] = art.created.strftime("%Y-%m-%d")
+        user = User.query.filter_by(id=art.user_id).first()
+        artdict['author'] = user.username
+        artdict['views'] = art.views
+        cate = Category.query.filter_by(id=art.cate_id).first()
+        artdict['cateName'] = cate.name
+        artdict['isTopping'] = art.is_topping
+        artdict['weight'] = get_weight_of_article(user_id, art.id)
+
+        articleList.append(copy.deepcopy(artdict))
+    articleList.sort(key=lambda art: art['weight'], reverse=True)
+    return articleList
+
+
+# 计算文章对当前用户的权重
+def get_weight_of_article(user_id, art_id):
+    # 1-->1.2  2-->1.3  3-->1.5  a-->*0.67
+    weight = 1.0
+    user = User.query.filter_by(id=user_id, is_deleted=0).first()
+    markstr = user.mark
+    if markstr is None:
+        return 1.0
+    markstrlist = markstr.split(',')
+    marklist = list(map(int, markstrlist))
+
+    taglist = []
+    relations= Relation.query.filter_by(art_id=art_id, is_deleted=0).all()
+    tag_ids = [relation.tag_id for relation in relations]
+    tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+    if tags is not None and len(tags)!=0:
+        taglist = [tag.id for tag in tags]
+    ret = list(set(marklist).intersection(set(taglist)))  # 求交集
+    if len(ret)==3:
+        weight = 1.5
+    elif len(ret)==2:
+        weight = 1.3
+    elif len(ret)==1:
+        weight = 1.2
+    
+    # 判断当前用户是否已经看过当前文章
+    record = Record.query.filter_by(art_id=art_id, user_id=user_id, is_deleted=0).first()
+    if record is not None:
+        weight *= 0.67
+    return weight
+
+
+
 
 # 分类首页
 @app.route('/category/<catename>')
@@ -758,14 +828,22 @@ def search():
 
 # 生成推荐标记
 @app.route('/getmark', methods=['GET'])
+@login_required
 def getmark():
-    print('='*30)
     start, end = get_se_of_recent_month()
+    # print('start={}, end={}'.format(start, end))
     users = User.query.filter_by(is_deleted=0).all()
+    nums = len(users)
+    # print('nums={}'.format(nums))
     for user in users:
-        records = Record.query.filter(Record.rtime>start, Record.rtime<end).filter_by(user_id=user.id, is_deleted=0).all()
+        # print('='*30)
+        # print('user={}-{}'.format(user.id, user.username))
+        records = Record.query.filter(Record.rtime>=start, Record.rtime<=end).filter_by(user_id=user.id, is_deleted=0).all()
         if records is None or len(records)==0:
+            # print('---------1')
+            nums -= 1
             continue
+        # print('user={}-{}'.format(user.id, user.username))        
         tags = []        
         for record in records:
             relations = Relation.query.filter_by(art_id=record.art_id, is_deleted=0).all()
@@ -781,13 +859,21 @@ def getmark():
             else:
                 tag_dict[tag.id] = 1
         # print(tag_dict)
-        max_tags = []
+        max_tag_ids = []
         for i in range(3):
-            max_tag = max(tag_dict, key=tag_dict.get)
-            max_tags.append(max_tag)
-            tag_dict[max_tag] = 0
-        print(max_tags)
-    print('='*30)
+            max_tag_id = max(tag_dict, key=tag_dict.get)
+            max_tag_ids.append(str(max_tag_id))
+            tag_dict[max_tag_id] = 0
+        # print(max_tag_ids)
+        # print('='*30)
+        if max_tag_ids is not None and len(max_tag_ids)!=0:
+            markstr = ','.join(max_tag_ids)
+            User.query.filter_by(id=user.id).update({
+                'mark' : markstr
+            })
+            db.session.commit()
+    return jsonify({'status': True, 'msg': '成功为{}名用户添加推荐标记！'.format(nums)})
+    # return jsonify({'status': False, 'msg': '为用户添加推荐标记失败！'})
 
 
 # 获取请求中的有关信息用于访问记录
@@ -804,7 +890,6 @@ def get_reqinfo(request):
     return {'ip': ip, 'platform': platform, 'browser': browser, 'version': version, 'language': language,}
 
 
-
 # 获取一周的开始和结束  type：datetime
 def get_se_of_week():
     day_of_week = datetime.now().weekday()
@@ -814,10 +899,10 @@ def get_se_of_week():
     return start, end
 
 
-# 获取以今天结束的最近30天的开始和结束
+# 获取以今天23:59结束的最近30天的开始和结束 type：datetime
 def get_se_of_recent_month():
     today =  int(time.mktime(date.today().timetuple()))
-    start = datetime.fromtimestamp(today-259200)   # 30*86400 = 259200
-    end = datetime.fromtimestamp(today)
+    start = datetime.fromtimestamp(today-2592000)   # 30*86400 = 2592000
+    end = datetime.fromtimestamp(today+86399)
     return start, end
 

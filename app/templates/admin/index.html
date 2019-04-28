@@ -50,14 +50,19 @@
                   </div>
               </form>
               <button id="jsonTest" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">Json Test</button>
-              <a href="{{ url_for('getmark') }}">
-                <button id="jsonTest" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getMark</button>
-              </a>
+              <button id="getMark" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getMark</button>
           </div>
       </div>
 
   </div>
 </main>
+
+{% endblock %}
+
+<!-- Page specific javascripts-->
+{% block pagescript %}
+<script src="../../static/blog/jquery/jquery.min.js"></script>
+<script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
 
 {% endblock %}
 
@@ -83,8 +88,34 @@
       });
   });
 
-
-
+</script>
+<script>
+  $('#getMark').click(function(){
+    $.ajax({
+      url: '/getmark',
+      type: 'GET',
+      success: function(res){
+          //console.log(response);
+          if(res.status == true){
+            $.notify({
+                message: res.msg
+            },{
+                type: 'success'
+            });
+          }else{
+            $.notify({
+                // title: "错误:",
+                message: res.msg
+            },{
+                type: 'danger'
+            });
+          }
+      },
+      error: function(error){
+          console.log(error);
+      }
+      });
+  });
 </script>
 
 {% endblock %}
