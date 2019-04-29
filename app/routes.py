@@ -43,18 +43,28 @@ def index():
     #文章分页
     page = request.args.get('page', 1, type=int)
 
-    #分页查出所有可见(1)文章+倒序
-    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
-        page, app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('index', page=arts.next_num) \
-        if arts.has_next else None
-    prev_url = url_for('index', page=arts.prev_num) \
-        if arts.has_prev else None
+    
     # 处理文章信息
     if current_user.is_authenticated:
-        articleList = get_article_list_by_weight(arts.items, current_user.id)
+        page_size = app.config['POSTS_PER_PAGE']
+        start_index = (page-1)*page_size
+        end_index = start_index+page_size
+        articles = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).all()
+        articleList = get_article_list_by_weight(articles, current_user.id)
+        articleList.sort(key=lambda art: art['weight'], reverse=True)
+        articleList = articleList[start_index: end_index]
+        next_url = url_for('index', page=page+1) if len(articles)>end_index else None
+        prev_url = url_for('index', page=page-1) if start_index>0 else None
     else:
+        #分页查出所有可见(1)文章+倒序
+        arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+            page, app.config['POSTS_PER_PAGE'], False)
+        next_url = url_for('index', page=arts.next_num) \
+            if arts.has_next else None
+        prev_url = url_for('index', page=arts.prev_num) \
+            if arts.has_prev else None
         articleList = get_article_list(arts.items)
+        
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
                             loginForm=loginForm,registrationForm=registrationForm, articleList=articleList,
