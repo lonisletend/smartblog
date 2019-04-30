@@ -32,8 +32,9 @@
     })
 
     function search(){
-      stext = $("#search-text").val();
+      stext = $.trim($("#search-text").val());
       if (isEmpty(stext)){
+        $("#search-text").val('');
         $("#search-text").attr("placeholder","输入关键字");
         $("#search-text").focus();
         return false;
