@@ -21,8 +21,6 @@ from app.models.relation import Relation
 from app.models.comment import Comment
 from app.models.record import Record
 
-# from app.models.user import User
-
 
 def is_del(obj):
     if obj.is_deleted==1:
@@ -425,6 +423,51 @@ def article_manage():
     return render_template('admin/article_manage.html', articleList=articleList,
                             prev_url=prev_url, next_url=next_url)
 
+
+# 评论管理
+@app.route('/comment_manage', methods=['POST', 'GET'])
+@login_required
+def comment_manage():
+    if current_user.role == 'vistor':
+        return render_template('blog/index.html')
+    
+    page = request.args.get('page', 1, type=int)
+    #分页查出所有可见(1)文章+倒序
+    arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE_EDIT'], False)
+    next_url = url_for('comment_manage', page=arts.next_num) \
+        if arts.has_next else None
+    prev_url = url_for('comment_manage', page=arts.prev_num) \
+        if arts.has_prev else None
+    articleList = get_article_list(arts.items)
+    return render_template('admin/comment_manage.html', articleList=articleList,
+                            prev_url=prev_url, next_url=next_url)
+    
+
+# 获取评论数据
+@app.route('/comment/<artid>', methods=['POST', 'GET'])
+@login_required
+def comment(artid):
+    comments = Comment.query.filter_by(art_id=artid, is_deleted=0).all()
+    if comments is not None:
+        comments = list(comments)
+        # data = json.dumps(comment.__dict__ for comment in comments)
+        # print(comments)
+        # print(type(comments))
+        data = []
+        for cmt in comments:
+            data.append(json.dumps(cmt.asdict()))
+        return jsonify({'status': True, 'msg': 'success', 'data':json.dumps(data)})
+    return jsonify({'status': False, 'msg': 'None'})
+
+
+# 删除评论
+@app.route('/delcmt/<cmtid>', methods=['POST', 'GET'])
+@login_required
+def delcmt(cmtid):
+    if current_user.role == 'vistor':
+        return render_template('blog/index.html')
+    commet = 
 
 # 新建文章
 @app.route('/admin_new', methods=['POST', 'GET'])
@@ -915,4 +958,5 @@ def get_se_of_recent_month():
     start = datetime.fromtimestamp(today-2592000)   # 30*86400 = 2592000
     end = datetime.fromtimestamp(today+86399)
     return start, end
+
 

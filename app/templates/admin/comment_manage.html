@@ -13,8 +13,8 @@
     <li><a class="app-menu__item" href="{{ url_for('admin_new') }}"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
     <li class="treeview is-expanded"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
         <ul class="treeview-menu">
-            <li><a class="treeview-item active" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
-            <li><a class="treeview-item" href="{{ url_for('comment_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
+            <li><a class="treeview-item" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
+            <li><a class="treeview-item active" href="{{ url_for('comment_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('category_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
@@ -34,11 +34,11 @@
 </ul>
 {% endblock %} {% block content %}
 <main class="app-content">
-    <div class="row">
+    <div class="row" id="art-panel">
         <div class="col-md-12">
             <div class="tile">
                 <!-- <h3 class="tile-title"></h3> -->
-                <legend>文章管理</legend>
+                <legend>评论管理</legend>
                 <div class="tile">
                     <h3 class="tile-title">所有文章</h3>
                     <table class="table table-hover">
@@ -49,7 +49,7 @@
                           <th>作者</th>
                           <th>标题</th>
                           <th>分类</th>
-                          <th>标签</th>
+                          <!-- <th>标签</th> -->
                           <th>操作</th>
                         </tr>
                       </thead>
@@ -63,21 +63,11 @@
                             <td><a href="{{ url_for('article', artid=article.id) }}">{{ article.title }}</a></td>
                             <td>
                               <!-- <span class="badge badge-secondary">{{ article['cateName'] }}</span>   -->
-                              <span><a class="badge badge-secondary" href="#">{{ article.cateName }}</a> </span>                        </td>
+                              <span><a class="badge badge-secondary" href="#">{{ article.cateName }}</a> </span>                        
+                            </td>
                             <th>
-                                {% for tagName in article.tagNames %}
-                                {% if loop.index%3 == 1 %}
-                                <span><a class="badge badge-primary" href="#">{{ tagName }}</a> </span>
-                                {% elif loop.index%3 == 2 %}
-                                <span><a class="badge badge-success" href="#">{{ tagName }}</a> </span>
-                                {% elif loop.index%3 == 0 %}
-                                <span><a class="badge badge-info" href="#">{{ tagName }}</a> </span>
-                                {% endif %}
-                                {% endfor %}
-                            </th>
-                            <th>
-                                <a href="{{ url_for('article_edit', artid=article.id) }}">编辑</a>&nbsp;&nbsp;
-                                <a id="{{ article.id }}" style="color: #FF534D" class="delete" href="javascript:void(0)">删除</a>
+                                <a id="{{ article.id }}" class="comment" href="#">查看评论</a>&nbsp;&nbsp;
+                                <!-- <a id="{{ article.id }}" style="color: #FF534D" class="delete" href="javascript:void(0)">删除</a> -->
                             </th>
                           </tr>
                         {% endfor %}
@@ -107,6 +97,34 @@
         </div>
 
     </div>
+    <div class="row" id="cmt-panel" style="display: none;">
+        <div class="col-md-12">
+            <div class="tile">
+                
+                <legend>评论管理</legend>
+                <div class="tile">
+                    <h4 class="tile-title"><span id="cmt-title"></span><button id="back-btn" class="btn btn-warning float-right" type="button" >返回</button></h4>
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>日期</th>
+                          <th>评论人</th>
+                          <th>评论内容</th>
+                          <th>操作</th>
+                          <!-- <th>标签</th> -->
+                          <!-- <th>操作</th> -->
+                        </tr>
+                      </thead>
+                      <tbody id="tbody">
+                        
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </main>
 {% endblock %}
 
@@ -118,15 +136,72 @@
 <!-- 最后加载自定义js -->
 {% block tailscript %}
 <script>
-    $('.delete').click(function(){
+    $(".comment").click(function(){
+        var title = $(this).parent().parent().find('td').eq(3).html().trim();
+        $("#cmt-title").html('文章"'+ title +'"的所有评论：');
+        var article_id = $(this).attr('id');
+        cmt_url = "/comment/"+article_id;
+        $.ajax({
+            url: cmt_url,
+            type: 'GET',
+            success: function(res){
+                if(res.status == true){
+                    // console.log(typeof(res.data));
+                    // console.log(res.data);
+                    var comments = JSON.parse(res.data);
+                    // console.log(typeof(comments));
+                    // console.log(comments);
 
-        var artcle_id = $(this).attr('id');
-        // alert(artid);
-        $("#artid").val(artcle_id);
-        delurl = "/article_del/"+artcle_id;
+                    if(comments.length == 0){
+                        str = "<tr><td align='center' colspan='5'>"+
+                              "<strong style='color: #F17C67'>文章暂无评论</strong>"+
+                              "</td></tr>";
+                        $("#tbody").append(str);
+                    }else{
+                        for(i=0; i<comments.length; i++){
+                        // console.log(comments[i]);
+                        // console.log("==================");
+                        // console.log(typeof(comments[i]));
+                        // console.log("==================");
+                            comment = JSON.parse(comments[i]);
+                            str = "<tr>"+
+                                "<td>"+ (i+1) +"</td>"+
+                                "<td>"+ comment.created +"</td>" +
+                                "<td>"+ comment.username +"</td>" +
+                                "<td style='color: #028090; max-width:500px;'>"+ comment.text +"</td>" +
+                                "<td><a id='"+ comment.id +"' style='color: #FF534D' class='delcmt' href='javascript:void(0)'><strong>删除</strong></a></td>"+
+                                "</tr>";
+                            $("#tbody").append(str);
+                        }
+                    }
 
-      	swal({
-      		title: "确定删除所选文章吗?",
+                    
+                    
+                }else{
+                    console.log(res.msg);
+                }
+            },
+            error: function(error){
+                console.log(error);
+            }
+        });
+        $("#art-panel").hide();
+        $("#cmt-panel").show();
+
+    });
+    $("#back-btn").click(function(){
+        $("#art-panel").show();
+        $("#cmt-panel").hide();
+        $("#tbody").html('');
+    });
+</script>
+<script>
+    $('.delcmt').click(function(){
+        cmt_id = $(this).attr('id');
+        delurl = "/delcmt/"+cmt_id;
+
+        swal({
+      		title: "确定删除所选评论吗?",
       		text: "删除后数据不可恢复!",
       		type: "warning",
       		showCancelButton: true,
@@ -136,16 +211,13 @@
       		closeOnCancel: false
       	}, function(isConfirm) {
       		if (isConfirm) {
-                //  del_form添加value
         
                 $.ajax({
                 url: delurl,
-                // data: $('#del-form').serialize(),
                 type: 'GET',
                 success: function(res){
-                    //console.log(response);
                     if(res.status == true){
-                        swal({title: "删除成功!", text: "已删除所选文章", type: "success"},
+                        swal({title: "删除成功!", text: "已删除所选评论", type: "success"},
                             function(){ 
                                 location.reload();
                             }
