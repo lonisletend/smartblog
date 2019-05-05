@@ -467,7 +467,14 @@ def comment(artid):
 def delcmt(cmtid):
     if current_user.role == 'vistor':
         return render_template('blog/index.html')
-    commet = 
+    comment = Comment.query.filter_by(id=cmtid).first()
+    if comment is not None:
+        Comment.query.filter_by(id=cmtid).update({
+            'is_deleted': 0
+        })
+        db.session.commit()
+        return jsonify({'status': True, 'msg': '所选评论已删除！'})
+    return jsonify({'status': False, 'msg':'删除失败！'})
 
 # 新建文章
 @app.route('/admin_new', methods=['POST', 'GET'])
