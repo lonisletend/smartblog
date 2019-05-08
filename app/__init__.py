@@ -15,5 +15,5 @@ app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
 
 from app import routes, models
-from app.models import user, article, category, tag, relation, comment, record
+from app.models import user, article, category, tag, relation, comment, record, option
 

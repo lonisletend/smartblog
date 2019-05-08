@@ -20,6 +20,7 @@ from app.models.tag import Tag
 from app.models.relation import Relation
 from app.models.comment import Comment
 from app.models.record import Record
+from app.models.option import Option
 
 
 def is_del(obj):
@@ -967,3 +968,18 @@ def get_se_of_recent_month():
     return start, end
 
 
+@app.route('/admin_option', methods=['POST', 'GET'])
+@login_required
+def admin_option():
+    return render_template('admin/admin_option.html')
+
+
+@app.route('/get_options', methods=['POST', 'GET'])
+@login_required
+def get_options():
+    options = Option.query.filter_by(is_deleted=0).all()
+    opt = {}
+    for option in options:
+        opt[option.name] = option.value
+    return jsonify({'status': True, 'options': json.dumps(opt)})
+        
