@@ -9,8 +9,8 @@
             <li><a class="treeview-item" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('comment_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('category_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
+            <!-- <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li> -->
+            <li><a class="treeview-item" href="{{ url_for('user_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
           </ul>
         </li>
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
@@ -49,8 +49,8 @@
                       {% endif %}
                   </div>
               </form>
-              <button id="jsonTest" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">Json Test</button>
-              <button id="getMark" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getMark</button>
+              <!-- <button id="jsonTest" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">Json Test</button>
+              <button id="getMark" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getMark</button> -->
           </div>
       </div>
 
@@ -68,7 +68,7 @@
 
 {% block tailscript %}
 
-<script>
+<!-- <script>
   $('#jsonTest').click(function(){
     $.ajax({
       url: '/jsonTest',
@@ -116,6 +116,6 @@
       }
       });
   });
-</script>
+</script> -->
 
 {% endblock %}

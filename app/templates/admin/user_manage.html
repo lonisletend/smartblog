@@ -13,11 +13,11 @@
     <li><a class="app-menu__item" href="{{ url_for('admin_new') }}"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
     <li class="treeview is-expanded"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
         <ul class="treeview-menu">
-            <li><a class="treeview-item active" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
+            <li><a class="treeview-item" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('comment_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('category_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
             <!-- <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li> -->
-            <li><a class="treeview-item" href="{{ url_for('user_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
+            <li><a class="treeview-item active" href="{{ url_for('user_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
         </ul>
     </li>
     <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
@@ -38,50 +38,50 @@
         <div class="col-md-12">
             <div class="tile">
                 <!-- <h3 class="tile-title"></h3> -->
-                <legend>文章管理</legend>
+                <legend>用户管理</legend>
                 <div class="tile">
-                    <h3 class="tile-title">所有文章</h3>
+                    <h3 class="tile-title">所有用户<button id="gen-mark-btn" class="btn btn-info float-right" type="button" >生成推荐数据</button></h3>
                     <table class="table table-hover">
                       <thead>
                         <tr>
                           <th>#</th>
-                          <th>日期</th>
-                          <th>作者</th>
-                          <th>标题</th>
-                          <th>分类</th>
-                          <th>标签</th>
-                          <th>操作</th>
+                          <th>用户名</th>
+                          <th>邮箱</th>
+                          <th>用户组</th>
+                          <th>注册时间</th>
+                          <th>最后登录时间</th>
+                          <th>推荐标签</th>
+                          <!-- <th>操作</th> -->
                         </tr>
                       </thead>
                       <tbody>
-                        {% if articleList %}
-                        {% for article in articleList %}
+                        {% if userList %}
+                        {% for user in userList %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ article.date }}</td>
-                            <td><a href="{{ url_for('profile', username=article.author) }}">{{ article.author }}</a></td>
-                            <td><a href="{{ url_for('article', artid=article.id) }}">{{ article.title }}</a></td>
-                            <td>
-                              <!-- <span class="badge badge-secondary">{{ article['cateName'] }}</span>   -->
-                              <span><a class="badge badge-secondary" href="#">{{ article.cateName }}</a> </span>                        </td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>{{ user.created }}</td>
+                            <td>{{ user.logged }}</td>
                             <th>
-                                {% for tagName in article.tagNames %}
-                                {% if loop.index%3 == 1 %}
-                                <span><a class="badge badge-primary" href="#">{{ tagName }}</a> </span>
-                                {% elif loop.index%3 == 2 %}
-                                <span><a class="badge badge-success" href="#">{{ tagName }}</a> </span>
-                                {% elif loop.index%3 == 0 %}
-                                <span><a class="badge badge-info" href="#">{{ tagName }}</a> </span>
+                                {% if user.tags %}
+                                <span><a class="badge badge-primary" href="#">{{ user.tags[0] }}</a> </span>
+                                <span><a class="badge badge-success" href="#">{{ user.tags[1] }}</a> </span>
+                                <span><a class="badge badge-info" href="#">{{ user.tags[2] }}</a> </span>
+                                {% else %}
+                                <strong style='color: #F17C67'>暂无数据</strong>
                                 {% endif %}
-                                {% endfor %}
                             </th>
-                            <th>
-                                <a href="{{ url_for('article_edit', artid=article.id) }}">编辑</a>&nbsp;&nbsp;
-                                <a id="{{ article.id }}" style="color: #FF534D" class="delete" href="javascript:void(0)">删除</a>
-                            </th>
-                          </tr>
+                            <!-- <th>删除</th> -->
+                        </tr>
                         {% endfor %}
                         {% endif %}
+                        <tr>
+                            <td align='center' colspan='7'>
+                                <strong style='color: #F17C67'>"暂无数据"</strong>表示该用户最近一个月没有访问记录，无法生成推荐标签。
+                            </td>
+                        </tr>
                       </tbody>
                     </table>
                 </div>
@@ -113,57 +113,43 @@
 <!-- Page specific javascripts-->
 {% block pagescript %}
 <script src="../../static/admin/js/plugins/sweetalert.min.js"></script>
+<script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
 {% endblock %}
 
 <!-- 最后加载自定义js -->
 {% block tailscript %}
 <script>
-    $('.delete').click(function(){
+    
+  $('#gen-mark-btn').click(function(){
+    $.ajax({
+      url: '/getmark',
+      type: 'GET',
+      success: function(res){
+          //console.log(response);
+          if(res.status == true){
+            $.notify({
+                message: res.msg
+            },{
+                type: 'success'
+            });
+            setTimeout(function(){
+                location.reload();
+            }, 3000)
+          }else{
+            $.notify({
+                // title: "错误:",
+                message: res.msg
+            },{
+                type: 'danger'
+            });
+          }
+      },
+      error: function(error){
+          console.log(error);
+      }
+      });
+  });
 
-        var artcle_id = $(this).attr('id');
-        // alert(artid);
-        $("#artid").val(artcle_id);
-        delurl = "/article_del/"+artcle_id;
 
-      	swal({
-      		title: "确定删除所选文章吗?",
-      		text: "删除后数据不可恢复!",
-      		type: "warning",
-      		showCancelButton: true,
-      		confirmButtonText: "是，确认删除!",
-      		cancelButtonText: "不, 手抖了!",
-      		closeOnConfirm: false,
-      		closeOnCancel: false
-      	}, function(isConfirm) {
-      		if (isConfirm) {
-                //  del_form添加value
-        
-                $.ajax({
-                url: delurl,
-                // data: $('#del-form').serialize(),
-                type: 'GET',
-                success: function(res){
-                    //console.log(response);
-                    if(res.status == true){
-                        swal({title: "删除成功!", text: "已删除所选文章", type: "success"},
-                            function(){ 
-                                location.reload();
-                            }
-                        );
-                    }else{
-                        swal("删除失败！", res.msg, "error");
-                    }
-                },
-                error: function(error){
-                    console.log(error);
-                }
-                });
-                
-      		} else {
-      			swal("取消删除", "删除操作已取消", "error");
-      		}
-      	});
-
-    });
 </script>
 {% endblock %}

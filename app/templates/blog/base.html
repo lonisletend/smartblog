@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
+<head>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="">
-
-    {% if title %}
+    <meta name="author" content=""> {% if title %}
     <title>{{ title }}-SmartBlog</title>
     {% else %}
     <title>SmartBlog</title>
@@ -19,18 +17,13 @@
 
     <!-- Custom styles for this template -->
     <link href="../../static/blog/css/blog-home.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../static/blog/css/message.css">
-    {% block headcss %}{% endblock %}
+    <link rel="stylesheet" href="../../static/blog/css/message.css"> {% block headcss %}{% endblock %}
 
-  </head>
+</head>
 
-  <body>
-    
-    {% include "blog/_navigation.html" %}
+<body>
 
-    {% block content %}{% endblock %}
-
-    {% include "blog/_footer.html" %}
+    {% include "blog/_navigation.html" %} {% block content %}{% endblock %} {% include "blog/_footer.html" %}
 
     <!-- Bootstrap core JavaScript -->
     <script src="../../static/blog/jquery/jquery.min.js"></script>
@@ -41,8 +34,31 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js'></script>
     <script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
     <!-- 最后加载自定义js -->
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: '/get_options',
+                type: 'GET',
+                success: function(res) {
+                    //console.log(response);
+                    if (res.status == true) {
+                        optionStr = res.options;
+                        option = JSON.parse(optionStr);
+                        // $('#blog-name').html(option.blog_name);
+                        $('#back-song').html(window.atob(option.song));
+
+                    } else {
+                        console.log('getOptions failed');
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        })
+    </script>
     {% block tailscript %}{% endblock %}
-    
-  </body>
+
+</body>
 
 </html>

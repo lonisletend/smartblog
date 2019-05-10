@@ -1,45 +1,55 @@
-{% extends "admin/base.html" %}
-
-{% block appmenu %}
+{% extends "admin/base.html" %} {% block appmenu %}
 <ul class="app-menu">
-        <li><a class="app-menu__item active" href=""><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
-        <li><a class="app-menu__item" href="{{ url_for('admin_new') }}"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
-        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-          <ul class="treeview-menu">
+    <li><a class="app-menu__item active" href=""><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">首页</span></a></li>
+    <li><a class="app-menu__item" href="{{ url_for('admin_new') }}"><i class="app-menu__icon fa fa-edit"></i><span class="app-menu__label">新建文章</span></a></li>
+    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">博客管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <ul class="treeview-menu">
             <li><a class="treeview-item" href="{{ url_for('article_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;文章管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('comment_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;评论管理</a></li>
             <li><a class="treeview-item" href="{{ url_for('category_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;分类管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
-          </ul>
-        </li>
-        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-          <ul class="treeview-menu">
+            <!-- <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;标签管理</a></li> -->
+            <li><a class="treeview-item" href="{{ url_for('user_manage') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;用户管理</a></li>
+        </ul>
+    </li>
+    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <ul class="treeview-menu">
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Notifications</a></li>
-          </ul>
-        </li>
-        <li><a class="app-menu__item" href="{{ url_for('admin_option') }}"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
-        
-        
-      </ul>
-{% endblock %}
+        </ul>
+    </li>
+    <li><a class="app-menu__item" href="{{ url_for('admin_option') }}"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
 
-{% block content %}
+
+</ul>
+{% endblock %} {% block content %}
 
 <main class="app-content">
-  <div class="row">
-      <div class="col-md-12">
-          <div class="tile">
-              <!-- <h3 class="tile-title"></h3> -->
-              <legend>基础设置</legend>
-              <button id="getOptions" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getOptions</button>
-          </div>
-      </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <!-- <h3 class="tile-title"></h3> -->
+                <legend>基础设置</legend>
+                <!-- <button id="getOptions" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getOptions</button> -->
+                <div class="form-group">
+                    <label class="col-form-label col-form-label" for="opt-blog-name">博客名称</label>
+                    <div class="form-inline">
+                        <input class="form-control col-md-6" id="opt-blog-name" type="text"> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button id="save-blog-name" class="btn btn-success btn-sm" type="button">保存</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label col-form-label" for="opt-back-song">音乐链接</label>
+                    <div class="form-inline">
+                        <input class="form-control col-md-6" id="opt-back-song" type="text"> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button id="save-back-song" class="btn btn-success btn-sm" type="button">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  </div>
+    </div>
 </main>
 
 {% endblock %}
@@ -49,36 +59,122 @@
 <script src="../../static/blog/jquery/jquery.min.js"></script>
 <script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
 
-{% endblock %}
-
-{% block tailscript %}
+{% endblock %} {% block tailscript %}
 
 <script>
-  $('#getOptions').click(function(){
-    $.ajax({
-      url: '/get_options',
-      type: 'GET',
-      success: function(res){
-          //console.log(response);
-          if(res.status == true){
-              alert(res.options);
-              console.log(typeof(res.options));
-              optionStr = res.options;
-              option = JSON.parse(optionStr);
-              console.log(option)
-              console.log(typeof(option))
-              alert(option.blog_name);
-              alert(option.song);
+    $('#getOptions').click(function() {
+        $.ajax({
+            url: '/get_options',
+            type: 'GET',
+            success: function(res) {
+                //console.log(response);
+                if (res.status == true) {
+                    // alert(res.options);
+                    // console.log(typeof(res.options));
+                    optionStr = res.options;
+                    option = JSON.parse(optionStr);
+                    // console.log(option)
+                    // console.log(typeof(option))
+                    // alert(option.blog_name);
+                    // alert(option.song);
+                    $('#opt-blog-name').val(option.blog_name);
+                    $('#opt-back-song').val(option.song);
 
-          }else{
-              alert('getOptions failed');
-          }
-      },
-      error: function(error){
-          console.log(error);
-      }
-      });
-  })
+                } else {
+                    alert('getOptions failed');
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    })
+</script>
+
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: '/get_options',
+            type: 'GET',
+            success: function(res) {
+                //console.log(response);
+                if (res.status == true) {
+                    // alert(res.options);
+                    // console.log(typeof(res.options));
+                    optionStr = res.options;
+                    option = JSON.parse(optionStr);
+                    // console.log(option)
+                    // console.log(typeof(option))
+                    // alert(option.blog_name);
+                    // alert(option.song);
+                    $('#opt-blog-name').val(option.blog_name);
+                    $('#opt-back-song').val(window.atob(option.song));
+
+                } else {
+                    alert('getOptions failed');
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    })
+</script>
+
+<script>
+    $('#save-blog-name').click(function() {
+        var blog_name = $('#opt-blog-name').val();
+        var opt_edit_url = 'opt_edit?blog_name=' + blog_name;
+        $.ajax({
+            url: opt_edit_url,
+            type: 'GET',
+            success: function(res) {
+                //console.log(response);
+                if (res.status == true) {
+                    $.notify({
+                        message: res.msg
+                    }, {
+                        type: 'success'
+                    });
+                    setTimeout(function(){
+                        location.reload();
+                    }, 3000)
+                } else {
+                    alert('edit options failed');
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+    $('#save-back-song').click(function() {
+        var back_song = $('#opt-back-song').val();
+        back_song_base64 = window.btoa(back_song);
+        var opt_edit_url = 'opt_edit?back_song=' + back_song_base64;
+        $.ajax({
+            url: opt_edit_url,
+            type: 'GET',
+            success: function(res) {
+                //console.log(response);
+                if (res.status == true) {
+                    $.notify({
+                        message: res.msg
+                    }, {
+                        type: 'success'
+                    });
+                    setTimeout(function(){
+                        location.reload();
+                    }, 3000)
+                } else {
+                    alert('edit options failed');
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    })
 </script>
 
 {% endblock %}

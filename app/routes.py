@@ -27,13 +27,25 @@ def is_del(obj):
     if obj.is_deleted==1:
         return True
 
+@app.before_request
+def before_request():
+    if not hasattr(g,'blog_name'):
+        blog_name = Option.query.filter_by(name='blog_name').first()
+        if blog_name is not None:
+            setattr(g,'blog_name',blog_name.value)
+        else:
+            setattr(g,'blog_name','SmartBlog')
+    if not hasattr(g, 'loginForm'):
+        setattr(g, 'loginForm', LoginForm())
+    if not hasattr(g, 'registrationForm'):
+        setattr(g, 'registrationForm', RegistrationForm())
 
 # 首页
 @app.route('/')
 @app.route('/index')
 def index():
-    loginForm = LoginForm()
-    registrationForm = RegistrationForm()
+    # loginForm = LoginForm()
+    # registrationForm = RegistrationForm()
     cateId = 0
 
     # 导航栏
@@ -66,8 +78,8 @@ def index():
         
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=loginForm,registrationForm=registrationForm, articleList=articleList,
-                            prev_url=prev_url, next_url=next_url)
+                            loginForm=g.loginForm,registrationForm=g.registrationForm, articleList=articleList,
+                            prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
 def get_article_list(articles):
     articleList = []
@@ -174,8 +186,8 @@ def category(catename):
     # 查出分类id
     cateId = Category.query.filter_by(name=catename).first().id
 
-    loginForm = LoginForm()
-    registrationForm = RegistrationForm()
+    # loginForm = LoginForm()
+    # registrationForm = RegistrationForm()
     # 导航栏
     cates = get_categorys()
     #文章分页
@@ -191,8 +203,8 @@ def category(catename):
     articleList = get_article_list(arts.items)
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=loginForm, registrationForm=registrationForm, articleList=articleList,
-                            prev_url=prev_url, next_url=next_url)
+                            loginForm=g.loginForm, registrationForm=g.registrationForm, articleList=articleList,
+                            prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
 
 
@@ -205,8 +217,8 @@ def test():
 # 文章详情
 @app.route('/article/<artid>')
 def article(artid):
-    loginForm = LoginForm()
-    registrationForm = RegistrationForm()
+    # loginForm = LoginForm()
+    # registrationForm = RegistrationForm()
     cates = get_categorys()
 
     # 添加访问记录
@@ -262,8 +274,8 @@ def article(artid):
         cmtdict['comment'] = cmt
         comments.append(copy.deepcopy(cmtdict))
 
-    return render_template('blog/article.html', title="Article", cates=cates, loginForm=loginForm, 
-                            registrationForm=registrationForm, article=article, comments=comments)
+    return render_template('blog/article.html', title="Article", cates=cates, loginForm=g.loginForm, 
+                            registrationForm=g.registrationForm, article=article, comments=comments, blog_name=g.blog_name)
 
 
 # 添加评论
@@ -343,8 +355,8 @@ def logout():
 @app.route('/profile/<username>')
 # @login_required
 def profile(username):
-    loginForm = LoginForm()
-    registrationForm = RegistrationForm()
+    # loginForm = LoginForm()
+    # registrationForm = RegistrationForm()
     cates = get_categorys()
 
     user = User.query.filter_by(username=username).first_or_404()
@@ -354,8 +366,8 @@ def profile(username):
     else:
         comments = []
         auth = False
-    return render_template('blog/profile.html', loginForm=loginForm, cates=cates, registrationForm=registrationForm,
-                            user=user, comments=comments, auth=auth)
+    return render_template('blog/profile.html', loginForm=g.loginForm, cates=cates, registrationForm=g.registrationForm,
+                            user=user, comments=comments, auth=auth, blog_name=g.blog_name)
 
 
 # 个人信息编辑
@@ -772,6 +784,38 @@ def category_del(cateid):
             return jsonify({'status': True, 'msg': '删除成功！'})
 
 
+# 用户管理
+@app.route('/user_manage', methods=['POST', 'GET'])
+@login_required
+def user_manage():
+    users = User.query.filter_by(is_deleted=0).all()
+    item = {'username': '', 'email': '', 'role': '', 'created': '', 'logged': '', 'tags':[]}
+    userList = []
+    for user in users:
+        item['username'] = user.username
+        item['email'] = user.email
+        if user.role == 'vistor':
+            item['role'] = '普通用户'
+        elif user.role == 'admin':
+            item['role'] = '管理员'
+        item['created'] = user.created.strftime("%Y-%m-%d %H:%M:%S")
+        item['logged'] = user.logged.strftime("%Y-%m-%d %H:%M:%S")
+        if user.mark is None:
+            item['tags'] = None
+        else:
+            markstrlist = user.mark.split(',')
+            marklist = list(map(int, markstrlist))
+            # print(marklist)
+            tags = []
+            for tag_id in marklist:
+                tag = Tag.query.filter_by(is_deleted=0, id=tag_id).first()
+                if tag is not None:
+                    tags.append(copy.deepcopy(tag.name))
+            item['tags'] = tags
+        userList.append(copy.deepcopy(item))
+        # print(json.dumps(item))
+    return render_template('admin/user_manage.html', userList=userList)
+
 
 # 生成标签
 @app.route('/generate_tags', methods=['POST', 'GET'])
@@ -858,8 +902,8 @@ def get_categorys():
 # 全局搜索
 @app.route('/search', methods=['POST', 'GET'])
 def search():
-    loginForm = LoginForm()
-    registrationForm = RegistrationForm()
+    # loginForm = LoginForm()
+    # registrationForm = RegistrationForm()
     cates = get_categorys()
     page = request.args.get('page', 1, type=int)
 
@@ -882,9 +926,9 @@ def search():
     prev_url = url_for('search', q=q, page=page - 1) \
         if page > 1 else None
 
-    return render_template('blog/index.html', cates=cates, loginForm=loginForm, registrationForm=registrationForm,
+    return render_template('blog/index.html', cates=cates, loginForm=g.loginForm, registrationForm=g.registrationForm,
                             q=q, search=1, total=total, articleList=articleList, 
-                            prev_url=prev_url, next_url=next_url)
+                            prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
 
 # 生成推荐标记
@@ -933,7 +977,7 @@ def getmark():
                 'mark' : markstr
             })
             db.session.commit()
-    return jsonify({'status': True, 'msg': '成功为{}名用户添加推荐标记！'.format(nums)})
+    return jsonify({'status': True, 'msg': '成功为{}名用户添加推荐标记，正在刷新...'.format(nums)})
     # return jsonify({'status': False, 'msg': '为用户添加推荐标记失败！'})
 
 
@@ -983,3 +1027,23 @@ def get_options():
         opt[option.name] = option.value
     return jsonify({'status': True, 'options': json.dumps(opt)})
         
+
+@app.route('/opt_edit', methods=['POST', 'GET'])
+@login_required
+def opt_edit():
+    blog_name = request.args.get('blog_name')
+    if blog_name is not None:
+        Option.query.filter_by(name='blog_name').update({
+            'value': blog_name
+        })
+        db.session.commit()
+        g.blog_name = blog_name
+        return jsonify({'status': True, 'msg': '博客名称已保存，正在刷新...'})
+    
+    back_song = request.args.get('back_song')
+    if back_song is not None:
+        Option.query.filter_by(name='song').update({
+            'value': back_song
+        })
+        db.session.commit()
+        return jsonify({'status': True, 'msg': '音乐链接已保存，正在刷新...'})
