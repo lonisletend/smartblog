@@ -5,7 +5,7 @@ import copy
 import json
 import time
 from datetime import datetime, timedelta, date
-from jieba import analyse
+from jieba import analyse, cut
 from app import app
 from app import db
 from flask import render_template, request, jsonify, redirect, url_for, g
@@ -39,6 +39,8 @@ def before_request():
         setattr(g, 'loginForm', LoginForm())
     if not hasattr(g, 'registrationForm'):
         setattr(g, 'registrationForm', RegistrationForm())
+    if not hasattr(g, 'sense_dict_list'):
+        setattr(g, 'sense_dict_list', None)
 
 # 首页
 @app.route('/')
@@ -291,7 +293,7 @@ def add_comment():
     cmt.art_id = art_id
     cmt.user_id = current_user.id
     cmt.username = current_user.username
-    cmt.text = comment
+    cmt.text = sense_filter(comment)
     db.session.add(cmt)
 
     article = Article.query.filter_by(id=art_id).first()
@@ -302,6 +304,25 @@ def add_comment():
     db.session.commit()
     return jsonify({'status': True, 'msg': '添加评论成功！'})
 
+
+def get_sense_dict_list(file_path):
+    filter_dict = []
+    file = open(file_path)
+    while 1:
+        line = file.readline()
+        if not line:
+            break
+        filter_dict.append(line.replace('\n',''))
+    return filter_dict
+
+def sense_filter(text):
+    cut_list = list(cut(text, cut_all=False))
+    if g.sense_dict_list is None:
+        g.sense_dict_list = get_sense_dict_list('./app/jiebatest/sense.txt')
+    sense_list = list(set(g.sense_dict_list).intersection(set(cut_list)))
+    for word in sense_list:
+        text = text.replace(word, '*'*len(word))
+    return text
 
 # 登录
 @app.route('/login', methods=['POST', 'GET'])
