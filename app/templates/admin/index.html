@@ -36,6 +36,7 @@
               <!-- <h3 class="tile-title"></h3> -->
               <legend>网站概要</legend>
               <form id="newForm">
+                  <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                   <div class="form-group">
                       <label for="title" class="col-form-label col-form-label-lg">目前共有：</label>
                       {% if size %}

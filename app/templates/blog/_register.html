@@ -13,7 +13,7 @@
                 </div> 
                 <div class="modal-body">
                     <form id="registrationForm" class="form-group">
-
+                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                         <div class="form-group">
                             {{ registrationForm.username.label }}
                             {{ registrationForm.username(size=32, id="username1", class="form-control", placeholder="6-15位字母、数字、下划线") }}

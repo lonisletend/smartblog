@@ -41,6 +41,7 @@
                 <legend>编辑文章</legend>
                 {% if article %}
                 <form id="editForm">
+                    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                     <input id="id", name="id" type="hidden" value="{{ article.id }}">
                     <div class="form-group">
                         <label for="title" class="col-form-label col-form-label-lg">标题</label>
@@ -146,6 +147,7 @@
 
                 </form>
                 <form id="geneTagForm" style="display: none">
+                    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label for="text" class="col-form-label col-form-label-lg">正文</label>
                         <textarea id="tmptext" name="tmptext" class="form-control" rows="15"></textarea>

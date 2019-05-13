@@ -107,6 +107,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <form id="cate-add-form" class="form-group">
+                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                         <br>
                         <div class="form-group row">
                                 <label class="control-label col-md-3" style="font-size: 18px; margin-top: 4px;">新增分类：</label>
@@ -136,6 +137,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <form id="cate-edit-form" class="form-group">
+                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                         <br>
                         <div class="form-group row">
                                 <label class="control-label col-md-3" style="font-size: 18px; margin-top: 4px;">分类名称：</label>

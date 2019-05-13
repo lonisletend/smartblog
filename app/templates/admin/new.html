@@ -38,6 +38,7 @@
                 <!-- <h3 class="tile-title"></h3> -->
                 <legend>新建文章</legend>
                 <form id="newForm">
+                    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label for="title" class="col-form-label col-form-label-lg">标题</label>
                         <input id="title" name="title" class="form-control form-control-lg" type="text" placeholder="请输入文章标题">
@@ -110,6 +111,7 @@
 
                 </form>
                 <form id="geneTagForm" style="display: none">
+                    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label for="text" class="col-form-label col-form-label-lg">正文</label>
                         <textarea id="tmptext" name="tmptext" class="form-control" rows="15"></textarea>
