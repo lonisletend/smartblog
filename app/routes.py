@@ -1068,3 +1068,26 @@ def opt_edit():
         })
         db.session.commit()
         return jsonify({'status': True, 'msg': '音乐链接已保存，正在刷新...'})
+
+
+# 最近访问
+@app.route('/records', methods=['POST', 'GET'])
+@login_required
+def records():
+    page = request.args.get('page', 1, type=int)
+    recs = Record.query.filter_by(is_deleted=0).order_by(Record.rtime.desc()).paginate(
+            page, app.config['RECORDS_PER_PAGE'], False)
+    next_url = url_for('records', page=recs.next_num) \
+            if recs.has_next else None
+    prev_url = url_for('records', page=recs.prev_num) \
+            if recs.has_prev else None 
+    records = recs.items
+
+    articles = {}
+    for record in records:
+        article = Article.query.filter_by(id=record.art_id, is_deleted=0).first()
+        if article is not None:
+            articles[record.id] = article.title
+
+    return render_template('admin/records.html', records = records, articles=articles, 
+                            next_url=next_url, prev_url=prev_url, page=page, page_size=app.config['RECORDS_PER_PAGE'])
