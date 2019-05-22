@@ -37,14 +37,14 @@
                 <span class="float-right inline">
                     <form class="form-inline">
                         <div class="form-group mx-sm-3 mb-2">
-                            <select class="form-control" id="exampleSelect1">
-                            <option>今天</option>
-                            <option>最近一周</option>
-                            <option>最近一月</option>
-                            <option>最近90天</option>
+                            <select class="form-control" id="reqtime">
+                            <option value="today">今天</option>
+                            <option value="week" selected>最近一周</option>
+                            <option value="month">最近一月</option>
+                            <option value="season">最近90天</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary mb-2">查询</button>
+                        <button id="search-btn" type="button" class="btn btn-primary mb-2">查询</button>
                     </form>
                 </span>
               </legend>
@@ -116,6 +116,31 @@
 
 {% block tailscript %}
 
+<script>
 
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null)
+            return unescape(r[2]);
+        return null;
+    }
+
+    $(document).ready(function(){
+      // alert(getQueryString('reqtime'));
+      reqtime = getQueryString('reqtime');
+      // alert(reqtime);
+      if(reqtime != null){
+        $('#reqtime').find("option[value='"+ reqtime +"']").attr("selected", true);
+      }
+      // alert($('#reqtime').val());
+    })
+
+    $('#search-btn').click(function(){
+      reqtime = $('#reqtime').val();
+      // alert(reqtime);
+      window.location.replace('records?reqtime='+reqtime)
+    });
+  </script>
 
 {% endblock %}

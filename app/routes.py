@@ -1024,13 +1024,33 @@ def get_se_of_week():
     end = datetime.fromtimestamp(today+(7-day_of_week)*86400-1)
     return start, end
 
+def get_se_of_today():
+    today =  int(time.mktime(date.today().timetuple()))
+    start = datetime.fromtimestamp(today)
+    end = datetime.fromtimestamp(today+86399)
+    return start, end
+
+# 获取最近一周时间开始和结束  type：datetime
+def get_se_of_recent_week():
+    today =  int(time.mktime(date.today().timetuple()))
+    start = datetime.fromtimestamp(today-6*86400)
+    end = datetime.fromtimestamp(today+86399)
+    return start, end
+
 
 # 获取以今天23:59结束的最近30天的开始和结束 type：datetime
 def get_se_of_recent_month():
     today =  int(time.mktime(date.today().timetuple()))
-    start = datetime.fromtimestamp(today-2592000)   # 30*86400 = 2592000
+    start = datetime.fromtimestamp(today-29*86400)   # 30*86400 = 2592000
     end = datetime.fromtimestamp(today+86399)
     return start, end
+
+def get_se_of_recent_season():
+    today =  int(time.mktime(date.today().timetuple()))
+    start = datetime.fromtimestamp(today-89*86400)  
+    end = datetime.fromtimestamp(today+86399)
+    return start, end
+
 
 
 @app.route('/admin_option', methods=['POST', 'GET'])
@@ -1075,11 +1095,22 @@ def opt_edit():
 @login_required
 def records():
     page = request.args.get('page', 1, type=int)
-    recs = Record.query.filter_by(is_deleted=0).order_by(Record.rtime.desc()).paginate(
+    reqtime = request.args.get('reqtime', 'week', type=str)
+    if reqtime == 'week':
+        start, end = get_se_of_recent_week()
+    elif reqtime == 'today':
+        start, end = get_se_of_today()
+    elif reqtime == 'month':
+        start, end = get_se_of_recent_month()
+    elif reqtime == 'season':
+        start, end = get_se_of_recent_season()
+    # print('start={}'.format(start))
+    # print('end={}'.format(end))
+    recs = Record.query.filter(Record.rtime>=start, Record.rtime<=end).filter_by(is_deleted=0).order_by(Record.rtime.desc()).paginate(
             page, app.config['RECORDS_PER_PAGE'], False)
-    next_url = url_for('records', page=recs.next_num) \
+    next_url = url_for('records', reqtime=reqtime, page=recs.next_num) \
             if recs.has_next else None
-    prev_url = url_for('records', page=recs.prev_num) \
+    prev_url = url_for('records', reqtime=reqtime, page=recs.prev_num) \
             if recs.has_prev else None 
     records = recs.items
 
