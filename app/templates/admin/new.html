@@ -20,10 +20,8 @@
     </li>
     <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
         <ul class="treeview-menu">
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
-            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Notifications</a></li>
+            <li><a class="treeview-item" href="{{ url_for('records') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;最近访问</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;访问统计</a></li>
         </ul>
     </li>
     <li><a class="app-menu__item" href="{{ url_for('admin_option') }}"><i class="app-menu__icon fa fa-cog"></i><span class="app-menu__label">基础设置</span></a></li>
