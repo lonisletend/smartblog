@@ -223,21 +223,34 @@ def article(artid):
     # registrationForm = RegistrationForm()
     cates = get_categorys()
 
-    # 添加访问记录
-    record = Record()
-    record.art_id = artid
-    if current_user.is_authenticated:
-        record.user_id = current_user.id
-        record.username = current_user.username
+    # 添加访问记录 同文章登录用户6小时记录一次，防止评论刷新产生垃圾数据影响推荐标记生成结果准确性
 
-    info = get_reqinfo(request)
-    record.ip = info['ip']
-    record.platform = info['platform']
-    record.browser = info['browser']
-    record.version = info['version']
-    record.language = info['language']
-    db.session.add(record)
-    db.session.commit()
+    ignore = False
+    if current_user.is_authenticated:
+        now = int(time.time())
+        start = datetime.fromtimestamp(now-6*3600)
+        end = datetime.fromtimestamp(now)
+        print(start)
+        print(end)
+        record = Record.query.filter(Record.rtime>=start, Record.rtime<=end).filter_by(art_id=artid, user_id=current_user.id, is_deleted=0).first()
+        if record is not None:
+            ignore = True
+
+    if ignore == False:
+        record = Record()
+        record.art_id = artid
+        if current_user.is_authenticated:
+            record.user_id = current_user.id
+            record.username = current_user.username
+
+        info = get_reqinfo(request)
+        record.ip = info['ip']
+        record.platform = info['platform']
+        record.browser = info['browser']
+        record.version = info['version']
+        record.language = info['language']
+        db.session.add(record)
+        db.session.commit()
 
     #返回文章详情信息
     art = Article.query.filter_by(id=artid).first()
