@@ -1135,3 +1135,41 @@ def records():
 
     return render_template('admin/records.html', records = records, articles=articles, 
                             next_url=next_url, prev_url=prev_url, page=page, page_size=app.config['RECORDS_PER_PAGE'])
+
+
+# 访问统计
+@app.route('/records_statistic', methods=['POST', 'GET'])
+@login_required
+def records_statistic():
+    get_labels_and_items()
+    return render_template('admin/records_statistic.html')
+
+
+def get_labels_and_items():
+    labels = []
+    items = []
+    week_dict = {0:'周一', 1:'周二', 2:'周三', 3:'周四', 4:'周五', 5:'周六', 6:'周日'}
+    start, end = get_se_of_recent_week()
+    records = Record.query.filter(Record.rtime>=start, Record.rtime<=end).filter_by(is_deleted=0).all()
+    rec_dict = {}
+    for record in records:
+        rdate = record.rtime.strftime("%Y-%m-%d")
+        if rdate in rec_dict:
+            rec_dict[rdate] += 1
+        else:
+            rec_dict[rdate] = 1
+    
+    date_list = sorted(rec_dict)
+    for d in date_list:
+        week = datetime.strptime(d, '%Y-%m-%d').weekday()
+        labels.append(week_dict[week])
+    labels[-1] = '今天'
+    for label in labels:
+        if label == '周日':
+            break
+        labels[labels.index(label)] = '上'+label
+    for rdate in date_list:
+        items.append(rec_dict[rdate])
+    print(labels)
+    print(items)
+    return labels, items
