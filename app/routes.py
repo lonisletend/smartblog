@@ -216,6 +216,12 @@ def test():
     return render_template('test/test.html')
 
 
+@app.route('/editor')
+def editor():
+    return render_template('admin/editor.html')
+
+
+
 # 文章详情
 @app.route('/article/<artid>')
 def article(artid):

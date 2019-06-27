@@ -43,9 +43,18 @@
         <div class="card-body">
         <!-- 文章主体内容(暂定html格式) -->
         <p class="card-text">
-            {% autoescape false %}
-            {{ article.text }}
-            {% endautoescape %}
+             <!-- <div id="test-editormd-view">
+               <textarea style="display:none;" name="test-editormd-markdown-doc">###Hello world!</textarea>               
+            </div> -->
+            <div id="test-editormd-view2">
+                <textarea id="append-test" style="display:none;">
+                    {% autoescape false %}
+<!-- 之前不能有空格 会出现markdown渲染错误 -->
+{{ article.text }}
+                    {% endautoescape %}
+				</textarea>          
+            </div>
+            
         </p>
         <!-- 文章主体结束 -->
         </div>
