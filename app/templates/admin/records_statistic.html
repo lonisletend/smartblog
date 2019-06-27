@@ -16,7 +16,7 @@
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-pie-chart"></i><span class="app-menu__label">数据分析</span><i class="treeview-indicator fa fa-angle-right"></i></a>
           <ul class="treeview-menu">
             <li><a class="treeview-item" href="{{ url_for('records') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;最近访问</a></li>
-            <li><a class="treeview-item" href="{{ url_for('records_statistic') }}"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;访问统计</a></li>
+            <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> &nbsp;&nbsp;访问统计</a></li>
             <!-- <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Components</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Custom Components</a></li>
             <li><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Form Samples</a></li>
@@ -36,22 +36,25 @@
       <div class="col-md-12">
           <div class="tile">
               <!-- <h3 class="tile-title"></h3> -->
-              <legend>网站概要</legend>
-              <form id="newForm">
-                  <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
-                  <div class="form-group">
-                      <label for="title" class="col-form-label col-form-label-lg">目前共有：</label>
-                      {% if size %}
-                      <div style="margin-left:40px;">
-                        <text style="font-size: 48px; width: 200px; color: #5BC0EB">{{ size.article }}</text><strong style="font-size: 24px;">篇文章；</strong>
-                        <text style="font-size: 48px; width: 200px; color: #FDE74C"">{{ size.comment }}</text><strong style="font-size: 24px;">个评论；</strong>
-                        <text style="font-size: 48px; width: 200px; color: #9BC53D"">{{ size.category }}</text><strong style="font-size: 24px;">个分类；</strong>
-                        <text style="font-size: 48px; width: 200px; color: #E55934"">{{ size.tag }}</text><strong style="font-size: 24px;">个标签；</strong>
-                        <text style="font-size: 48px; width: 200px; color: #FA7921"">{{ size.user }}</text><strong style="font-size: 24px;">个用户；</strong>
-                      </div>
-                      {% endif %}
+              <legend>访问统计</legend>
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="tile">
+                    <h3 class="tile-title">文章访问量</h3>
+                    <div class="embed-responsive embed-responsive-16by9">
+                      <canvas class="embed-responsive-item" id="lineChartDemo"></canvas>
+                    </div>
                   </div>
-              </form>
+                </div>
+                <!-- <div class="col-md-6">
+                  <div class="tile">
+                    <h3 class="tile-title">Support Requests</h3>
+                    <div class="embed-responsive embed-responsive-16by9">
+                      <canvas class="embed-responsive-item" id="pieChartDemo"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
               <!-- <button id="jsonTest" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">Json Test</button>
               <button id="getMark" class="btn btn-success btn-sm" type="button" style="margin-top:-15px;">getMark</button> -->
           </div>
@@ -70,55 +73,48 @@
 {% endblock %}
 
 {% block tailscript %}
+<!-- Page specific javascripts-->
+<script type="text/javascript" src="../../static/admin/js/plugins/chart.js"></script>
+<script type="text/javascript">
 
-<!-- <script>
-  $('#jsonTest').click(function(){
-    $.ajax({
-      url: '/jsonTest',
-      type: 'GET',
-      success: function(res){
-          //console.log(response);
-          if(res.status == true){
-              alert(res.items);
-              console.log(res.items);
-          }else{
-              alert('test failed');
-          }
-      },
-      error: function(error){
-          console.log(error);
+  label1 = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+  item1 = [2, 4, 4, 1, 8, 2, 4];
+
+  var data = {
+    labels: label1,
+    datasets: [
+      {
+        label: "recent week records",
+        fillColor: "rgba(151,187,205,0.2)",
+        strokeColor: "rgba(151,187,205,1)",
+        pointColor: "rgba(151,187,205,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(151,187,205,1)",
+        data: item1
       }
-      });
-  });
-
+    ]
+  };
+  var pdata = [
+    {
+      value: 300,
+      color: "#46BFBD",
+      highlight: "#5AD3D1",
+      label: "Complete"
+    },
+    {
+      value: 50,
+      color:"#F7464A",
+      highlight: "#FF5A5E",
+      label: "In-Progress"
+    }
+  ]
+  
+  var ctxl = $("#lineChartDemo").get(0).getContext("2d");
+  var lineChart = new Chart(ctxl).Line(data);
+  
+  // var ctxp = $("#pieChartDemo").get(0).getContext("2d");
+  // var pieChart = new Chart(ctxp).Pie(pdata);
 </script>
-<script>
-  $('#getMark').click(function(){
-    $.ajax({
-      url: '/getmark',
-      type: 'GET',
-      success: function(res){
-          //console.log(response);
-          if(res.status == true){
-            $.notify({
-                message: res.msg
-            },{
-                type: 'success'
-            });
-          }else{
-            $.notify({
-                // title: "错误:",
-                message: res.msg
-            },{
-                type: 'danger'
-            });
-          }
-      },
-      error: function(error){
-          console.log(error);
-      }
-      });
-  });
-</script> -->
 
 {% endblock %}
