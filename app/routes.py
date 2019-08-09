@@ -46,19 +46,14 @@ def before_request():
 @app.route('/')
 @app.route('/index')
 def index():
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
     cateId = 0
-
     # 导航栏
     cates = get_categorys()
-
     #文章分页
     page = request.args.get('page', 1, type=int)
-
-    
     # 处理文章信息
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.mark is not None:
+        # 当前用户已认证 + 当前用户有推荐数据（mark）
         page_size = app.config['POSTS_PER_PAGE']
         start_index = (page-1)*page_size
         end_index = start_index+page_size
@@ -66,8 +61,8 @@ def index():
         articleList = get_article_list_by_weight(articles, current_user.id)
         articleList.sort(key=lambda art: art['weight'], reverse=True)
         articleList = articleList[start_index: end_index]
-        next_url = url_for('index', page=page+1) if len(articles)>end_index else None
-        prev_url = url_for('index', page=page-1) if start_index>0 else None
+        next_url = url_for('index', page=page+1) if len(articles) > end_index else None
+        prev_url = url_for('index', page=page-1) if start_index > 0 else None
     else:
         #分页查出所有可见(1)文章+倒序
         arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
@@ -78,7 +73,6 @@ def index():
             if arts.has_prev else None
         articleList = get_article_list(arts.items)
         
-
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
                             loginForm=g.loginForm,registrationForm=g.registrationForm, articleList=articleList,
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
@@ -86,25 +80,10 @@ def index():
 def get_article_list(articles):
     articleList = []
     artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
-    prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
-    suffix = ["</code>","</p>","</pre>"]
     for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        # artdict['text'] = art.text[:200]
-        text = art.text
-        for pre in prefix:
-            text = text.replace(pre, '')
-        for suf in suffix:
-            text = text.replace(suf, '<br>')
-        text = text.replace("<img","{")
-        text = text.replace(" />","}[图片]")
-        a1 = re.compile(r'\{.*?\}' )
-        text = a1.sub('',text)
-        artdict['text'] = text[:200]
-        # print('------------artid={}------------------'.format(art.id))
-        # print(artdict['text'])
-        # print('------------------------------------------------')
+        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
         artdict['author'] = user.username
@@ -115,37 +94,28 @@ def get_article_list(articles):
         articleList.append(copy.deepcopy(artdict))
     return articleList
 
+# 计算文章权重并返回文章信息 不排序
 def get_article_list_by_weight(articles, user_id):
-    articleList = []
+    article_list = []
     artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0, 'weight':1.0}
-    prefix = ["<code>","<p>","<pre>","<code class='language-shell' lang='shell'>", "<code class='language-javascript' lang='javascript'>"]
-    suffix = ["</code>","</p>","</pre>"]
     for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        # artdict['text'] = art.text[:200]
-        text = art.text
-        for pre in prefix:
-            text = text.replace(pre, '')
-        for suf in suffix:
-            text = text.replace(suf, '<br>')
-        text = text.replace("<img","{")
-        text = text.replace(" />","}[图片]")
-        a1 = re.compile(r'\{.*?\}' )
-        text = a1.sub('',text)
-        artdict['text'] = text[:200]
+        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
-        artdict['author'] = user.username
+        if user is not None:
+            artdict['author'] = user.username
         artdict['views'] = art.views
         cate = Category.query.filter_by(id=art.cate_id).first()
-        artdict['cateName'] = cate.name
+        if cate is not None:
+            artdict['cateName'] = cate.name
         artdict['isTopping'] = art.is_topping
         artdict['weight'] = get_weight_of_article(user_id, art.id)
 
-        articleList.append(copy.deepcopy(artdict))
-    articleList.sort(key=lambda art: art['weight'], reverse=True)
-    return articleList
+        article_list.append(copy.deepcopy(artdict))
+    article_list.sort(key=lambda art: art['weight'], reverse=True)
+    return article_list
 
 
 # 计算文章对当前用户的权重
@@ -154,26 +124,28 @@ def get_weight_of_article(user_id, art_id):
     weight = 1.0
     user = User.query.filter_by(id=user_id, is_deleted=0).first()
     markstr = user.mark
+    # 该用户没有推荐数据，权重全为1 （正常情况不会走到这里）
     if markstr is None:
         return 1.0
+    # 获取推荐标签
     markstrlist = markstr.split(',')
     marklist = list(map(int, markstrlist))
-
+    # 获取文章标签
     taglist = []
     relations= Relation.query.filter_by(art_id=art_id, is_deleted=0).all()
     tag_ids = [relation.tag_id for relation in relations]
     tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
     if tags is not None and len(tags)!=0:
         taglist = [tag.id for tag in tags]
-    ret = list(set(marklist).intersection(set(taglist)))  # 求交集
+    # 求交集
+    ret = list(set(marklist).intersection(set(taglist)))  
     if len(ret)==3:
         weight = 1.5
     elif len(ret)==2:
         weight = 1.3
     elif len(ret)==1:
         weight = 1.2
-    
-    # 判断当前用户是否已经看过当前文章
+    # 判断当前用户是否已经看过当前文章 若已看过 降低权重
     record = Record.query.filter_by(art_id=art_id, user_id=user_id, is_deleted=0).first()
     if record is not None:
         weight *= 0.66
