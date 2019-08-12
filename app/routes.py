@@ -10,8 +10,6 @@ from app import app
 from app import db
 from flask import render_template, request, jsonify, redirect, url_for, g
 from sqlalchemy import or_
-from app.forms.login_form import LoginForm
-from app.forms.registeration_form import RegistrationForm
 from flask_login import current_user, login_user, login_required, logout_user
 from app.models.user import User
 from app.models.category import Category
@@ -35,10 +33,6 @@ def before_request():
             setattr(g,'blog_name',blog_name.value)
         else:
             setattr(g,'blog_name','SmartBlog')
-    if not hasattr(g, 'loginForm'):
-        setattr(g, 'loginForm', LoginForm())
-    if not hasattr(g, 'registrationForm'):
-        setattr(g, 'registrationForm', RegistrationForm())
     if not hasattr(g, 'sense_dict_list'):
         setattr(g, 'sense_dict_list', None)
 
@@ -58,41 +52,49 @@ def index():
         start_index = (page-1)*page_size
         end_index = start_index+page_size
         articles = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).all()
-        articleList = get_article_list_by_weight(articles, current_user.id)
-        articleList.sort(key=lambda art: art['weight'], reverse=True)
-        articleList = articleList[start_index: end_index]
-        next_url = url_for('index', page=page+1) if len(articles) > end_index else None
-        prev_url = url_for('index', page=page-1) if start_index > 0 else None
+        article_list = get_article_list_by_weight(articles, current_user.id)
+        # 对获取的文章信息按权重倒序排序 取出所需的文章
+        article_list.sort(key=lambda art: art['weight'], reverse=True)
+        article_list = article_list[start_index: end_index]
+        # 手动设置上下页链接
+        next_url = url_for('index', page=page+1) \
+            if len(articles) > end_index else None
+        prev_url = url_for('index', page=page-1) \
+            if start_index > 0 else None
     else:
         #分页查出所有可见(1)文章+倒序
         arts = Article.query.filter_by(status=1, is_deleted=0).order_by(Article.created.desc()).paginate(
             page, app.config['POSTS_PER_PAGE'], False)
+        # 设置上下页链接
         next_url = url_for('index', page=arts.next_num) \
             if arts.has_next else None
         prev_url = url_for('index', page=arts.prev_num) \
             if arts.has_prev else None
-        articleList = get_article_list(arts.items)
+        article_list = get_article_list(arts.items)
         
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=g.loginForm,registrationForm=g.registrationForm, articleList=articleList,
+                            articleList=article_list,
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
+# 返回文章信息+排序
 def get_article_list(articles):
-    articleList = []
+    article_list = []
     artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
     for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]
+        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]+'...'
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
-        artdict['author'] = user.username
+        if user is not None:
+            artdict['author'] = user.username
         artdict['views'] = art.views
         cate = Category.query.filter_by(id=art.cate_id).first()
-        artdict['cateName'] = cate.name
+        if cate is not None:
+            artdict['cateName'] = cate.name
         artdict['isTopping'] = art.is_topping
-        articleList.append(copy.deepcopy(artdict))
-    return articleList
+        article_list.append(copy.deepcopy(artdict))
+    return article_list
 
 # 计算文章权重并返回文章信息 不排序
 def get_article_list_by_weight(articles, user_id):
@@ -101,7 +103,7 @@ def get_article_list_by_weight(articles, user_id):
     for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]
+        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]+'...'
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
         if user is not None:
@@ -116,7 +118,6 @@ def get_article_list_by_weight(articles, user_id):
         article_list.append(copy.deepcopy(artdict))
     article_list.sort(key=lambda art: art['weight'], reverse=True)
     return article_list
-
 
 # 计算文章对当前用户的权重
 def get_weight_of_article(user_id, art_id):
@@ -152,17 +153,12 @@ def get_weight_of_article(user_id, art_id):
     return weight
 
 
-
-
 # 分类首页
 @app.route('/category/<catename>')
 def category(catename):
     # 查出分类id
     cateId = Category.query.filter_by(name=catename).first().id
-
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
-    # 导航栏
+    # 导航栏分类
     cates = get_categorys()
     #文章分页
     page = request.args.get('page', 1, type=int)
@@ -174,12 +170,11 @@ def category(catename):
         if arts.has_next else None
     prev_url = url_for('category', catename=catename, page=arts.prev_num) \
         if arts.has_prev else None
-    articleList = get_article_list(arts.items)
+    article_list = get_article_list(arts.items)
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=g.loginForm, registrationForm=g.registrationForm, articleList=articleList,
+                             articleList=article_list,
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
-
 
 
 # 测试
@@ -193,23 +188,17 @@ def editor():
     return render_template('admin/editor.html')
 
 
-
 # 文章详情
 @app.route('/article/<artid>')
 def article(artid):
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
+    # 导航栏分类
     cates = get_categorys()
-
     # 添加访问记录 同文章登录用户6小时记录一次，防止评论刷新产生垃圾数据影响推荐标记生成结果准确性
-
     ignore = False
     if current_user.is_authenticated:
         now = int(time.time())
         start = datetime.fromtimestamp(now-6*3600)
         end = datetime.fromtimestamp(now)
-        print(start)
-        print(end)
         record = Record.query.filter(Record.rtime>=start, Record.rtime<=end).filter_by(art_id=artid, user_id=current_user.id, is_deleted=0).first()
         if record is not None:
             ignore = True
@@ -220,7 +209,7 @@ def article(artid):
         if current_user.is_authenticated:
             record.user_id = current_user.id
             record.username = current_user.username
-
+        # 获取访问信息
         info = get_reqinfo(request)
         record.ip = info['ip']
         record.platform = info['platform']
@@ -230,7 +219,7 @@ def article(artid):
         db.session.add(record)
         db.session.commit()
 
-    #返回文章详情信息
+    # 构造文章详情信息
     art = Article.query.filter_by(id=artid).first()
     article = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'tagNames':[], 'views':0, 'isTopping':0, 'cloud': ''}
     article['id'] = art.id
@@ -238,11 +227,12 @@ def article(artid):
     article['text'] = art.text
     article['date'] = art.created.strftime("%Y-%m-%d")
     user = User.query.filter_by(id=art.user_id).first()
-    article['author'] = user.username
+    if user is not None:
+        article['author'] = user.username
     article['views'] = art.views+1
     cate = Category.query.filter_by(id=art.cate_id).first()
-    article['cateName'] = cate.name
-    # artdict['tags'] = []
+    if cate is not None:
+        article['cateName'] = cate.name
     res = Relation.query.filter_by(art_id=art.id, is_deleted=0).all()
     for re in res:
         tag = Tag.query.filter_by(id=re.tag_id).first()
@@ -255,7 +245,7 @@ def article(artid):
     })
     db.session.commit()
 
-    #返回评论信息
+    #构造评论信息
     cmts = Comment.query.filter_by(art_id=artid, is_deleted=0).all()
     comments = []
     user = User()
@@ -267,8 +257,8 @@ def article(artid):
         cmtdict['comment'] = cmt
         comments.append(copy.deepcopy(cmtdict))
 
-    return render_template('blog/article.html', title="Article", cates=cates, loginForm=g.loginForm, 
-                            registrationForm=g.registrationForm, article=article, comments=comments, blog_name=g.blog_name)
+    return render_template('blog/article.html', title="Article", cates=cates,  
+                            article=article, comments=comments, blog_name=g.blog_name)
 
 
 # 添加评论
@@ -277,9 +267,7 @@ def add_comment():
     art_id = request.form['art_id']
     comment = request.form['comment']
     if comment is None or art_id is None:
-        return jsonify({'status': False, 'msg': '添加评论失败！'})
-    # print(art_id)
-    # print(comment)
+        return jsonify({'status': False, 'msg': '文章不存在或评论为空，添加评论失败！'})
     cmt = Comment()
     cmt.art_id = art_id
     cmt.user_id = current_user.id
@@ -295,7 +283,7 @@ def add_comment():
     db.session.commit()
     return jsonify({'status': True, 'msg': '添加评论成功！'})
 
-
+# 从文件中读取敏感词
 def get_sense_dict_list(file_path):
     filter_dict = []
     file = open(file_path)
@@ -306,6 +294,7 @@ def get_sense_dict_list(file_path):
         filter_dict.append(line.replace('\n',''))
     return filter_dict
 
+# 评论敏感词过滤
 def sense_filter(text):
     cut_list = list(cut(text, cut_all=False))
     if g.sense_dict_list is None:
@@ -367,8 +356,6 @@ def logout():
 @app.route('/profile/<username>')
 # @login_required
 def profile(username):
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
     cates = get_categorys()
 
     user = User.query.filter_by(username=username).first_or_404()
@@ -378,7 +365,7 @@ def profile(username):
     else:
         comments = []
         auth = False
-    return render_template('blog/profile.html', loginForm=g.loginForm, cates=cates, registrationForm=g.registrationForm,
+    return render_template('blog/profile.html',  cates=cates,
                             user=user, comments=comments, auth=auth, blog_name=g.blog_name)
 
 
@@ -914,8 +901,6 @@ def get_categorys():
 # 全局搜索
 @app.route('/search', methods=['POST', 'GET'])
 def search():
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
     cates = get_categorys()
     page = request.args.get('page', 1, type=int)
 
@@ -938,7 +923,7 @@ def search():
     prev_url = url_for('search', q=q, page=page - 1) \
         if page > 1 else None
 
-    return render_template('blog/index.html', cates=cates, loginForm=g.loginForm, registrationForm=g.registrationForm,
+    return render_template('blog/index.html', cates=cates, 
                             q=q, search=1, total=total, articleList=articleList, 
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
@@ -1004,7 +989,7 @@ def get_reqinfo(request):
     browser = request.user_agent.browser
     version = request.user_agent.version
     language = request.user_agent.language
-    return {'ip': ip, 'platform': platform, 'browser': browser, 'version': version, 'language': language,}
+    return {'ip': ip, 'platform': platform, 'browser': browser, 'version': version, 'language': language}
 
 
 # 获取一周的开始和结束  type：datetime

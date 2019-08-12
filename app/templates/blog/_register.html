@@ -15,28 +15,20 @@
                     <form id="registrationForm" class="form-group">
                         <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                         <div class="form-group">
-                            {{ registrationForm.username.label }}
-                            {{ registrationForm.username(size=32, id="username1", class="form-control", placeholder="6-15位字母、数字、下划线") }}
-                            <!-- <label for="">用户名</label>
-                            <input class="form-control" type="text" placeholder="6-15位字母或数字"> -->
+                            <label for="username">用户名</label>
+                            <input class="form-control" id="username1" name="username" placeholder="6-15位字母、数字、下划线" size="32" type="text" value="">
                         </div>
                         <div class="form-group">
-                            {{ registrationForm.email.label }}
-                            {{ registrationForm.email(size=64, id="email", class="form-control", placeholder="例如:example@gmail.com") }}
-                            <!-- <label for="">邮箱</label>
-                            <input class="form-control" type="email" placeholder="例如:123@123.com"> -->
+                            <label for="email">邮箱</label>
+                            <input class="form-control" id="email" name="email" placeholder="例如:example@gmail.com" size="64" type="text" value="">
                         </div>
                         <div class="form-group">
-                            {{ registrationForm.password.label }}
-                            {{ registrationForm.password(size=32, id="password1", class="form-control", placeholder="至少8位字母、数字、下划线") }}
-                            <!-- <label for="">密码</label>
-                            <input class="form-control" type="password" placeholder="至少6位字母或数字"> -->
+                            <label for="password">密码</label>
+                            <input class="form-control" id="password1" name="password" placeholder="至少8位字母、数字、下划线" size="32" type="password" value="">
                         </div>
                         <div class="form-group">
-                            {{ registrationForm.password2.label }}
-                            {{ registrationForm.password2(size=32, id="password2", class="form-control", placeholder="至少8位字母、数字、下划线") }}
-                            <!-- <label for="">再次输入密码</label>
-                            <input class="form-control" type="password" placeholder="至少6位字母或数字"> -->
+                            <label for="password2">再次输入密码</label>
+                            <input class="form-control" id="password2" name="password2" placeholder="至少8位字母、数字、下划线" size="32" type="password" value="">
                         </div>
                         <div id="rcomplain" class="alert alert-danger" style="display: none;">
                             <!-- 用户名或密码为空 -->
@@ -51,7 +43,6 @@
                             <button id="regbtn" type="button" class="btn btn-primary">提交</button>
                             <button class="btn btn-danger" data-dismiss="modal">取消</button>
                         </div>
-                        <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#login">已有账号？点我登录</a> -->
                         <a id="toLogin" onclick="toLogin()" href="" data-toggle="modal" data-dismiss="modal">已有账号？点我登录</a>
                     </form>
                 </div>
