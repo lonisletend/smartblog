@@ -10,8 +10,6 @@ from app import app
 from app import db
 from flask import render_template, request, jsonify, redirect, url_for, g
 from sqlalchemy import or_
-from app.forms.login_form import LoginForm
-from app.forms.registeration_form import RegistrationForm
 from flask_login import current_user, login_user, login_required, logout_user
 from app.models.user import User
 from app.models.category import Category
@@ -35,10 +33,6 @@ def before_request():
             setattr(g,'blog_name',blog_name.value)
         else:
             setattr(g,'blog_name','SmartBlog')
-    if not hasattr(g, 'loginForm'):
-        setattr(g, 'loginForm', LoginForm())
-    if not hasattr(g, 'registrationForm'):
-        setattr(g, 'registrationForm', RegistrationForm())
     if not hasattr(g, 'sense_dict_list'):
         setattr(g, 'sense_dict_list', None)
 
@@ -79,16 +73,17 @@ def index():
         article_list = get_article_list(arts.items)
         
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=g.loginForm,registrationForm=g.registrationForm, articleList=article_list,
+                            articleList=article_list,
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
+# 返回文章信息+排序
 def get_article_list(articles):
     article_list = []
     artdict = {'id':0, 'title':'', 'text':'', 'date':'', 'author':'', 'cateName':'', 'views':0, 'isTopping':0}
     for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]
+        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]+'...'
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
         if user is not None:
@@ -108,7 +103,7 @@ def get_article_list_by_weight(articles, user_id):
     for art in articles:
         artdict['id'] = art.id
         artdict['title'] = art.title
-        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]
+        artdict['text'] = art.text.replace('#', '').replace('```', '')[:200]+'...'
         artdict['date'] = art.created.strftime("%Y-%m-%d")
         user = User.query.filter_by(id=art.user_id).first()
         if user is not None:
@@ -163,7 +158,7 @@ def get_weight_of_article(user_id, art_id):
 def category(catename):
     # 查出分类id
     cateId = Category.query.filter_by(name=catename).first().id
-    # 导航栏
+    # 导航栏分类
     cates = get_categorys()
     #文章分页
     page = request.args.get('page', 1, type=int)
@@ -178,7 +173,7 @@ def category(catename):
     article_list = get_article_list(arts.items)
 
     return render_template('blog/index.html', title="Index", cates=cates, activeId=cateId, 
-                            loginForm=g.loginForm, registrationForm=g.registrationForm, articleList=article_list,
+                             articleList=article_list,
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
 
@@ -262,8 +257,8 @@ def article(artid):
         cmtdict['comment'] = cmt
         comments.append(copy.deepcopy(cmtdict))
 
-    return render_template('blog/article.html', title="Article", cates=cates, loginForm=g.loginForm, 
-                            registrationForm=g.registrationForm, article=article, comments=comments, blog_name=g.blog_name)
+    return render_template('blog/article.html', title="Article", cates=cates,  
+                            article=article, comments=comments, blog_name=g.blog_name)
 
 
 # 添加评论
@@ -272,9 +267,7 @@ def add_comment():
     art_id = request.form['art_id']
     comment = request.form['comment']
     if comment is None or art_id is None:
-        return jsonify({'status': False, 'msg': '添加评论失败！'})
-    # print(art_id)
-    # print(comment)
+        return jsonify({'status': False, 'msg': '文章不存在或评论为空，添加评论失败！'})
     cmt = Comment()
     cmt.art_id = art_id
     cmt.user_id = current_user.id
@@ -290,7 +283,7 @@ def add_comment():
     db.session.commit()
     return jsonify({'status': True, 'msg': '添加评论成功！'})
 
-
+# 从文件中读取敏感词
 def get_sense_dict_list(file_path):
     filter_dict = []
     file = open(file_path)
@@ -301,6 +294,7 @@ def get_sense_dict_list(file_path):
         filter_dict.append(line.replace('\n',''))
     return filter_dict
 
+# 评论敏感词过滤
 def sense_filter(text):
     cut_list = list(cut(text, cut_all=False))
     if g.sense_dict_list is None:
@@ -362,8 +356,6 @@ def logout():
 @app.route('/profile/<username>')
 # @login_required
 def profile(username):
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
     cates = get_categorys()
 
     user = User.query.filter_by(username=username).first_or_404()
@@ -373,7 +365,7 @@ def profile(username):
     else:
         comments = []
         auth = False
-    return render_template('blog/profile.html', loginForm=g.loginForm, cates=cates, registrationForm=g.registrationForm,
+    return render_template('blog/profile.html',  cates=cates,
                             user=user, comments=comments, auth=auth, blog_name=g.blog_name)
 
 
@@ -909,8 +901,6 @@ def get_categorys():
 # 全局搜索
 @app.route('/search', methods=['POST', 'GET'])
 def search():
-    # loginForm = LoginForm()
-    # registrationForm = RegistrationForm()
     cates = get_categorys()
     page = request.args.get('page', 1, type=int)
 
@@ -933,7 +923,7 @@ def search():
     prev_url = url_for('search', q=q, page=page - 1) \
         if page > 1 else None
 
-    return render_template('blog/index.html', cates=cates, loginForm=g.loginForm, registrationForm=g.registrationForm,
+    return render_template('blog/index.html', cates=cates, 
                             q=q, search=1, total=total, articleList=articleList, 
                             prev_url=prev_url, next_url=next_url, blog_name=g.blog_name)
 
