@@ -15,16 +15,12 @@
                     <form id="loginForm" class="form-group">
                         <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
                         <div class="form-group">
-                            {{ loginForm.username.label }}
-                            {{ loginForm.username(class="form-control", id="username0") }}
-                            <!-- <label for="">用户名</label> -->
-                            <!-- <input class="form-control" type="text" placeholder=""> -->
+                            <label for="username">用户名</label>
+                            <input class="form-control" id="username0" name="username" type="text" value="">
                         </div>
                         <div class="form-group">
-                            {{ loginForm.password.label }}
-                            {{ loginForm.password(class="form-control", id="password0") }}
-                            <!-- <label for="">密码</label> -->
-                            <!-- <input class="form-control" type="password" placeholder=""> -->
+                            <label for="password">密码</label>
+                            <input class="form-control" id="password0" name="password" type="password" value="">
                         </div>
                         <div id="lcomplain" class="alert alert-warning" style="display: none;">
                             <!-- 用户名或密码为空 -->
@@ -39,7 +35,6 @@
                             <button id="loginbtn" type="button" class="btn btn-primary">登录</button>
                             <button class="btn btn-danger" data-dismiss="modal">取消</button>
                         </div>
-                        <!-- <a href="" data-toggle="modal" data-dismiss="modal" data-target="#register">还没有账号？点我注册</a> -->
                         <a id="toReg" href="" data-toggle="modal" data-dismiss="modal">还没有账号？点我注册</a>
                     </form>
                 </div>
