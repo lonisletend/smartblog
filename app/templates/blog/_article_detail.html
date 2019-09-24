@@ -42,17 +42,31 @@
         </div>
         <div class="card-body">
         <!-- 文章主体内容(暂定html格式) -->
-        <p class="card-text">
+        <!-- <p class="card-text">
             <div id="article-detail">
                 <textarea id="article-detail-text" style="display:none;">
                     {% autoescape false %}
-<!-- 之前不能有空格 会出现markdown渲染错误 -->
 {{ article.text }}
                     {% endautoescape %}
 				</textarea>          
             </div>
             
         </p>
+        <hr>
+        <span>TEST</span> -->
+        <div style="display:none;">
+        <textarea id="article-detail-text-test">
+        {% autoescape false %}
+{{ article.text }}
+        {% endautoescape %}
+        </textarea>
+        </div>
+        
+        <p class="card-text">
+            <div id="article-content" class="article">
+            </div>
+        </p>
+
         <!-- 文章主体结束 -->
         </div>
     </div>

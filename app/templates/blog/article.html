@@ -2,6 +2,7 @@
 
 {% block headcss %}
 <link rel="stylesheet" href="../../static/plugins/editor/css/editormd.preview.css" />
+<link rel="stylesheet" href="../../static/blog/css/article.css"
 {% endblock %}
 
 {% block content %}
@@ -31,6 +32,8 @@
 
   <script src="../../static/plugins/editor/js/editormd.js"></script>
 
+  <script src="../../static/blog/js/mditor.js"></script>
+
   <script type="text/javascript">
     $(function() {
         var testEditormdView;           
@@ -43,6 +46,14 @@
             sequenceDiagram : true,  // 默认不解析
         });
     });
+  
+  
+  </script>
+
+  <script>
+    var editor = new mditor(document.getElementById('article-detail-text-test'));
+    $('#article-content').html(editor.getHtml());
+  
   </script>
 
   <script>

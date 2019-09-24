@@ -29,6 +29,8 @@
 
   <script src="../../static/plugins/editor/js/editormd.js"></script>
 
+  <script src="../../static/blog/js/mditor.js"></script>
+
   <script>
     function isEmpty(obj){
       if(obj==undefined || obj==null || obj==''){
@@ -69,6 +71,17 @@
       });
     })
   });
+</script>
+
+<script>
+  $(function() {
+    $("div[id^='article-index-test']").each(function () {
+      // var editor_index = new mditor(document.getElementById($(this).attr('id')));
+      // $($(this).attr('id')+"-detail").html(editor_index.getHtml());
+      console.log($(this).attr('id'));
+    })
+  });
+
 </script>
 
 {% endblock %}
