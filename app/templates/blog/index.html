@@ -1,6 +1,8 @@
 {% extends "blog/base.html" %}
 
-{% block headcss %}{% endblock %}
+{% block headcss %}
+<link rel="stylesheet" href="../../static/blog/css/article.css">
+{% endblock %}
 
 {% block content %}
 
@@ -18,16 +20,6 @@
   <script src="../../static/blog/js/modal_redirect.js"></script>
   <script src="../../static/blog/js/login_register.js"></script>
   <!-- <script src="../../static//blog/js/search.js"></script> -->
-
-  <script src="../../static/plugins/editor/lib/marked.min.js"></script>
-  <script src="../../static/plugins/editor/lib/prettify.min.js"></script>
-  <script src="../../static/plugins/editor/lib/raphael.min.js"></script>
-  <script src="../../static/plugins/editor/lib/underscore.min.js"></script>
-  <script src="../../static/plugins/editor/lib/sequence-diagram.min.js"></script>
-  <script src="../../static/plugins/editor/lib/flowchart.min.js"></script>
-  <script src="../../static/plugins/editor/lib/jquery.flowchart.min.js"></script>
-
-  <script src="../../static/plugins/editor/js/editormd.js"></script>
 
   <script src="../../static/blog/js/mditor.js"></script>
 
@@ -55,30 +47,14 @@
     }
 
   </script>
-
-<script type="text/javascript">
-  $(function() {
-
-    $("div[id^='article-index']").each(function(){
-      var testEditormdView;
-      testEditormdView = editormd.markdownToHTML($(this).attr('id'), {
-          htmlDecode      : "style,script,iframe",
-          emoji           : true,
-          taskList        : true,
-          tex             : true,  // 默认不解析
-          flowChart       : true,  // 默认不解析
-          sequenceDiagram : true,  // 默认不解析
-      });
-    })
-  });
-</script>
-
 <script>
   $(function() {
-    $("div[id^='article-index-test']").each(function () {
-      // var editor_index = new mditor(document.getElementById($(this).attr('id')));
-      // $($(this).attr('id')+"-detail").html(editor_index.getHtml());
-      console.log($(this).attr('id'));
+    $("textarea[id^='article-index']").each(function () {
+      var editor_index = new mditor(document.getElementById($(this).attr('id')));
+      var select = '#'+$(this).attr('id')+'-detail';
+      // alert(select);
+      $(select).html(editor_index.getHtml());
+      
     })
   });
 

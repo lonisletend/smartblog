@@ -45,11 +45,16 @@
 
                     <div class="form-group">
                         <label for="text" class="col-form-label col-form-label-lg">正文</label>
-                        <textarea style="display:none;" id="text" name="text" class="form-control" rows="15"></textarea>
+                        <!-- <textarea style="display:none;" id="text" name="text" class="form-control" rows="15"></textarea>
                         <div id="tmp-text">
                             <textarea style="display:none;">
                             </textarea>
+                        </div> -->
+
+                        <div>
+                            <textarea id="tmp-text"></textarea>
                         </div>
+
                     </div>
 
                     <div class="row">
@@ -134,35 +139,12 @@
 <script src='../../static/admin/js/prism.min.js'></script>
 <script src="../../static/blog/jquery/jquery.min.js"></script>
 <script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
-<script src="../../static/plugins/editor/js/editormd.min.js"></script>
+<script src="../../static/blog/js/mditor.js"></script>
 
 {% endblock %}
 
 <!-- 最后加载自定义js -->
 {% block tailscript %}
-
-<script type="text/javascript">
-    var testEditor;
-
-    $(function() {
-        testEditor = editormd("tmp-text", {
-            width   : "100%",
-            height  : 580,
-            syncScrolling : "single",
-            path    : "../../static/plugins/editor/lib/"
-        });
-        $('.editormd-markdown-textarea').val('');
-        /*
-        // or
-        testEditor = editormd({
-            id      : "text",
-            width   : "90%",
-            height  : 640,
-            path    : "../lib/"
-        });
-        */
-    });
-</script>
 
 <script>
     var input = document.querySelector('input[name=tags]'),
@@ -220,6 +202,7 @@
 </script>
 
 <script>
+    var editor = new mditor(document.getElementById('tmp-text'));
     function isEmpty(obj) {
         if (obj == undefined || obj == null || obj == '') {
             return true;
@@ -229,7 +212,7 @@
 
     $('#publish').click(function() {
         title = $("#title").val();
-        text = $(".editormd-markdown-textarea").val();
+        text = $("#tmp-text").val();
         category = $("#category").val();
         tag = $("#tags").val();
         isTopping = $("#is_topping").val();
@@ -253,10 +236,10 @@
             }, {
                 type: 'danger'
             });
-            $(".editormd-markdown-textarea").focus();
+            $("#tmp-text").focus();
             return false;
         }else {
-            $('#text').val($('.editormd-markdown-textarea').val());
+            $('#text').val($('#tmp-text').val());
         }
 
         if (isEmpty(category)) {
@@ -315,14 +298,14 @@
     });
 
     $('#geneTags').click(function() {
-        if (isEmpty($('.editormd-markdown-textarea').val())) {
+        if (isEmpty($('#tmp-text').val())) {
             $.notify({
                 title: "错误:",
                 message: "正文为空，不能生成标签！"
             }, {
                 type: 'danger'
             });
-            $(".editormd-markdown-textarea").focus();
+            $("#tmp-text").focus();
             return false;
         }
 
@@ -332,7 +315,7 @@
         $('tags').remove();
 
         // ajax提交文章内容tmptext，生成新标签返回
-        $('#tmptext').val($('.editormd-markdown-textarea').val());
+        $('#tmptext').val($('#tmp-text').val());
         // console.log($('#tmptext').val());
         $.ajax({
             url: '/generate_tags',

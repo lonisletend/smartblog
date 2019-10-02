@@ -48,7 +48,10 @@
 
                     <div class="form-group">
                         <label for="text" class="col-form-label col-form-label-lg">正文</label>
-                        <textarea id="text" name="text" class="form-control" rows="15">{{ article.text }}</textarea>
+                        <!-- <textarea id="text" name="text" class="form-control" rows="15">{{ article.text }}</textarea> -->
+                        <div>
+                            <textarea id="text" name="text">{{ article.text }}</textarea>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -169,6 +172,8 @@
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 <script src="../../static/admin/js/plugins/bootstrap-notify.min.js"></script>
 
+<script src="../../static/blog/js/mditor.js"></script>
+
 {% endblock %}
 
 <!-- 最后加载自定义js -->
@@ -233,6 +238,7 @@
 </script>
 
 <script>
+    var editor = new mditor(document.getElementById('text'));
     function isEmpty(obj){
       if(obj==undefined || obj==null || obj==''){
         return true;
@@ -330,6 +336,16 @@
     });
 
     $('#geneTags').click(function(){
+        if (isEmpty($('#text').val())) {
+            $.notify({
+                title: "错误:",
+                message: "正文为空，不能生成标签！"
+            }, {
+                type: 'danger'
+            });
+            $("#tmp-text").focus();
+            return false;
+        }
         $("#geneTags").attr('disabled',true);
         $('#geneTags').html('标签生成中...');
         // 去掉原生成的tag标签，重新生成   不是很优雅，需要改进
