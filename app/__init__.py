@@ -18,3 +18,10 @@ app.csrfprotect = CSRFProtect(app)
 from app import routes, models
 from app.models import user, article, category, tag, relation, comment, record, option
 
+
+from app.errors import bp as errors_bp
+app.register_blueprint(errors_bp)
+
+from app.blog import bp as blog_bp
+app.register_blueprint(blog_bp)
+
